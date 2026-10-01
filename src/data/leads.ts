@@ -45,6 +45,19 @@ const stageToStatus: Record<Stage, LeadStatus> = {
 
 const dayFor = (i: number) => `${String(28 - i).padStart(2, '0')}/09/2026`
 
+const SOURCE_SET: LeadSource[] = [
+  'Iklan Online',
+  'Walk In',
+  'Referral',
+  'Media Sosial',
+  'Pembelian Toko',
+  'Lelang',
+  'Lainnya',
+]
+
+const toLeadSource = (s: string): LeadSource =>
+  SOURCE_SET.find((x) => x === s) ?? 'Lainnya'
+
 export const LEADS: Lead[] = PIPELINE.map((c, i) => ({
   id: c.key,
   code: `LD-202609${String(30 - i).padStart(2, '0')}-${String(i + 1).padStart(3, '0')}`,
@@ -56,20 +69,12 @@ export const LEADS: Lead[] = PIPELINE.map((c, i) => ({
   carType: `${c.brand} ${c.model}`,
   year: c.year,
   mileage: c.mileage,
-  source: c.source,
+  source: toLeadSource(c.source),
   expectedPrice: c.expectedPrice,
   createdAt: dayFor(i),
 }))
 
-export const LEAD_SOURCES: LeadSource[] = [
-  'Iklan Online',
-  'Walk In',
-  'Referral',
-  'Media Sosial',
-  'Pembelian Toko',
-  'Lelang',
-  'Lainnya',
-]
+export const LEAD_SOURCES: LeadSource[] = SOURCE_SET
 
 export const LEAD_STATUSES: LeadStatus[] = [
   'Baru',

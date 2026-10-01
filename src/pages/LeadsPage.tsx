@@ -24,7 +24,7 @@ const duplicatePlates = new Set(
 const invoiceFor = (id: string) => PURCHASES.find((p) => p.id === id)?.invoice
 const inspectionFor = (id: string) => INSPECTIONS.find((i) => i.id === id)
 
-type LeadForm = Omit<Lead, 'id' | 'code' | 'createdAt'> & { mileage?: number; expectedPrice?: number }
+type LeadForm = Omit<Lead, 'id' | 'code' | 'createdAt' | 'mileage' | 'expectedPrice'> & { mileage?: number; expectedPrice?: number }
 
 const emptyForm: LeadForm = {
   status: 'Baru',

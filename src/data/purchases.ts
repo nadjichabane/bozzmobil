@@ -1,4 +1,4 @@
-import { PURCHASE_CARS, type PipelineCar, type Stage } from './pipeline'
+import { PURCHASE_CARS, type PipelineCar } from './pipeline'
 
 export type Purchase = {
   id: string
@@ -22,15 +22,6 @@ const SUPPLIERS = [
   'PT Global Mobil',
   'CV Sentosa Auto',
 ]
-
-const stageToPurchaseStatus: Record<Stage, Purchase['status']> = {
-  lead: 'Diproses',
-  inspecting: 'Diproses',
-  rejected: 'Dibatalkan',
-  purchasing: 'Diproses',
-  available: 'Selesai',
-  sold: 'Selesai',
-}
 
 export const PURCHASES: Purchase[] = PURCHASE_CARS.map((c, i) => ({
   id: c.key,

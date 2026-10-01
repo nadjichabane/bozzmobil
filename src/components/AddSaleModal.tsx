@@ -1,6 +1,7 @@
 import { X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { type PaymentType, type Sale, type SaleStatus } from '../data/sales'
+import { makePipelineCar } from '../data/pipeline'
 
 type AddSaleModalProps = {
   open: boolean
@@ -49,6 +50,7 @@ export function AddSaleModal({ open, onClose, onSubmit }: AddSaleModalProps) {
       completeness: status === 'Lunas' ? 100 : 70,
       image: '/cars/serena.jpg',
       salesPerson: 'Rudi Hartono',
+      car: makePipelineCar({ key: `manual-${crypto.randomUUID().slice(0, 8)}`, plate: plate || 'B 0000 XXX' }),
     })
     onClose()
     setPlate('')

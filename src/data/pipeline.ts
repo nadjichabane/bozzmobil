@@ -97,3 +97,30 @@ export function masterChassis(key: string): string {
   }
   return map[key] ?? `CH-${key.replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 8)}`
 }
+
+/**
+ * Placeholder PipelineCar untuk penjualan manual yang belum terikat
+ * ke unit pipeline tertentu (mis. input dari form AddSaleModal).
+ */
+export function makePipelineCar(partial: Partial<PipelineCar> & { key: string }): PipelineCar {
+  const base: PipelineCar = {
+    key: partial.key,
+    stage: 'sold',
+    customer: '',
+    phone: '',
+    address: '',
+    plate: '',
+    brand: '',
+    model: '',
+    year: 0,
+    mileage: 0,
+    source: 'Manual',
+    expectedPrice: 0,
+    buyPrice: 0,
+    sellPrice: 0,
+    image: '/cars/serena.jpg',
+    color: 'Hitam',
+    transmission: 'Otomatis',
+  }
+  return { ...base, ...partial }
+}
