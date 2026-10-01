@@ -46,7 +46,7 @@ const SECTIONS: NavSection[] = [
     title: 'MENU UTAMA',
     items: [
       { id: 'dashboard', label: 'Dashboard & Reporting', icon: LayoutDashboard },
-      { id: 'kendaraan', label: 'Manajemen Kendaraan', icon: CarFront },
+      { id: 'kendaraan', label: 'Master Unit', icon: CarFront },
       { id: 'transaksi', label: 'Pembelian & Penjualan', icon: ShoppingBag },
       { id: 'inspeksi', label: 'Inspeksi & Hasil', icon: ClipboardCheck },
       { id: 'crm', label: 'CRM & Customer', icon: UsersRound },

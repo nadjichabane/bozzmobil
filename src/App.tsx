@@ -17,7 +17,7 @@ import { MigrasiPage } from './pages/MigrasiPage'
 const PAGE_COPY: Record<NavId, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard & Reporting', subtitle: 'Ringkasan operasional, transaksi, inventaris, dan absensi' },
   crm: { title: 'CRM & Customer Management', subtitle: 'Profil pelanggan, kontak, riwayat transaksi, pencarian & penyaringan' },
-  kendaraan: { title: 'Manajemen Kendaraan', subtitle: 'Unit, nopol, detail, status, harga beli & jual' },
+  kendaraan: { title: 'Master Unit', subtitle: 'Semua unit & status terpusat: pembelian, inspeksi, penjualan' },
   transaksi: { title: 'Pembelian & Penjualan', subtitle: 'Transaksi, relasi transaksi, harga & margin' },
   inspeksi: { title: 'Inspeksi & Hasil', subtitle: 'Item cek fisik, temuan, catatan, rekomendasi keputusan' },
   absensi: { title: 'Absensi Karyawan', subtitle: 'Kehadiran, waktu masuk/keluar, rekap monitoring' },
