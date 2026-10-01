@@ -525,6 +525,13 @@ export const SALES: Sale[] = [
 export const formatRupiah = (value: number) =>
   `Rp ${value.toLocaleString('id-ID')}`
 
+export const formatRupiahCompact = (value: number) => {
+  if (value >= 1_000_000_000) return `Rp ${(value / 1_000_000_000).toFixed(2).replace(/\.?0+$/, '')}M`
+  if (value >= 1_000_000) return `Rp ${(value / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}B`
+  if (value >= 1_000) return `Rp ${(value / 1_000).toFixed(1).replace(/\.?0+$/, '')}K`
+  return `Rp ${value}`
+}
+
 export const SALES_PEOPLE = ['Semua Sales', 'Rudi Hartono', 'Maya Putri', 'Andi Saputra']
 export const FINANCE_OPTIONS = [
   'Semua Finance',

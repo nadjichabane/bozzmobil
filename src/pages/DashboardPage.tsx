@@ -1,5 +1,5 @@
 import { Car, CircleDollarSign, FileWarning, Percent, TrendingUp, Wallet, Zap } from 'lucide-react'
-import { SALES, formatRupiah } from '../data/sales'
+import { SALES, formatRupiah, formatRupiahCompact } from '../data/sales'
 import { StatCard } from '../components/StatCard'
 
 const TOP_UNITS = [
@@ -38,8 +38,8 @@ export function DashboardPage() {
     <div className="px-4 py-5 lg:px-6 space-y-5">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard title="TOTAL PENJUALAN" value={`${totalSales} Unit`} trend="↑ 27% dari bulan lalu" icon={Car} iconBg="bg-[#2F80ED]" />
-        <StatCard title="TOTAL OMZET" value={formatRupiah(totalRevenue)} trend="↑ 18.6% dari bulan lalu" icon={Wallet} iconBg="bg-[#22C55E]" />
-        <StatCard title="LABA KOTOR" value={formatRupiah(totalProfit)} trend="↑ 19.8% dari bulan lalu" icon={CircleDollarSign} iconBg="bg-[#F59E0B]" />
+        <StatCard title="TOTAL OMZET" value={formatRupiahCompact(totalRevenue)} trend="↑ 18.6% dari bulan lalu" icon={Wallet} iconBg="bg-[#22C55E]" />
+        <StatCard title="LABA KOTOR" value={formatRupiahCompact(totalProfit)} trend="↑ 19.8% dari bulan lalu" icon={CircleDollarSign} iconBg="bg-[#F59E0B]" />
         <StatCard title="RATA-RATA MARGIN" value={`${avgMargin}%`} trend="↑ 1.2% dari bulan lalu" icon={Percent} iconBg="bg-[#8B5CF6]" />
       </div>
 

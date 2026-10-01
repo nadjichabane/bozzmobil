@@ -8,13 +8,19 @@ export function MasterUnitPage() {
   const [query, setQuery] = useState('')
   const [filterBrand, setFilterBrand] = useState('Semua Brand')
   const [filterCondition, setFilterCondition] = useState('Semua Kondisi')
+  const [filterYear, setFilterYear] = useState('Semua Tahun')
+  const [filterColor, setFilterColor] = useState('Semua Warna')
 
   const brands = ['Semua Brand', ...Array.from(new Set(units.map((u) => u.brand)))]
   const conditions = ['Semua Kondisi', 'Berkondisi Baik', 'Butuh Perbaikan Ringan', 'Butuh Perbaikan Besar']
+  const years = ['Semua Tahun', ...Array.from(new Set(units.map((u) => u.year))).sort((a, b) => b - a).map(String)]
+  const colors = ['Semua Warna', ...Array.from(new Set(units.map((u) => u.color)))]
 
   const filtered = units.filter((u) => {
     if (filterBrand !== 'Semua Brand' && u.brand !== filterBrand) return false
     if (filterCondition !== 'Semua Kondisi' && u.condition !== filterCondition) return false
+    if (filterYear !== 'Semua Tahun' && String(u.year) !== filterYear) return false
+    if (filterColor !== 'Semua Warna' && u.color !== filterColor) return false
     if (!query) return true
     const q = query.toLowerCase()
     return u.name.toLowerCase().includes(q) || u.brand.toLowerCase().includes(q) || u.model.toLowerCase().includes(q)
@@ -53,6 +59,12 @@ export function MasterUnitPage() {
         </select>
         <select value={filterCondition} onChange={(e) => setFilterCondition(e.target.value)} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
           {conditions.map((c) => <option key={c}>{c}</option>)}
+        </select>
+        <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
+          {years.map((y) => <option key={y}>{y}</option>)}
+        </select>
+        <select value={filterColor} onChange={(e) => setFilterColor(e.target.value)} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
+          {colors.map((c) => <option key={c}>{c}</option>)}
         </select>
       </div>
 

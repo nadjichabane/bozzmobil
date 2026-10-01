@@ -1,6 +1,7 @@
 import {
   CarFront,
   LayoutDashboard,
+  LogOut,
   Package,
   Scale,
   ShoppingBag,
@@ -40,33 +41,33 @@ type NavSection = {
 
 const SECTIONS: NavSection[] = [
   {
-    title: 'BERANDA',
-    items: [{ id: 'dashboard', label: 'Dashboard & Reporting', icon: LayoutDashboard }],
-  },
-  {
-    title: 'MODUL UTAMA',
+    title: 'MENU UTAMA',
     items: [
-      { id: 'crm', label: 'CRM & Customer', icon: UsersRound },
+      { id: 'dashboard', label: 'Dashboard & Reporting', icon: LayoutDashboard },
       { id: 'kendaraan', label: 'Manajemen Kendaraan', icon: CarFront },
       { id: 'transaksi', label: 'Pembelian & Penjualan', icon: ShoppingBag },
+      { id: 'crm', label: 'CRM & Customer', icon: UsersRound },
     ],
   },
   {
-    title: 'OPERASI & KEUANGAN',
+    title: 'OPERASIONAL',
     items: [
       { id: 'absensi', label: 'Absensi Karyawan', icon: UserCheck },
       { id: 'gudang', label: 'Gudang / Inventory', icon: Package },
       { id: 'komparasi', label: 'Komparasi Harga', icon: Scale },
-      { id: 'keuangan', label: 'Laporan Keuangan', icon: Wallet },
+      { id: 'hr', label: 'Human Resource', icon: Users },
     ],
   },
   {
-    title: 'SDM & SISTEM',
+    title: 'LAINNYA',
     items: [
-      { id: 'hr', label: 'Human Resource', icon: Users },
+      { id: 'keuangan', label: 'Laporan Keuangan', icon: Wallet },
       { id: 'user', label: 'User & Access', icon: UserPlus },
-      { id: 'migrasi', label: 'Migrasi & Integrasi', icon: UploadCloud },
     ],
+  },
+  {
+    title: 'INTEGRASI',
+    items: [{ id: 'migrasi', label: 'Migrasi & Integrasi', icon: UploadCloud }],
   },
 ]
 
@@ -141,7 +142,14 @@ export function Sidebar({ active, onSelect, open, desktopHidden, onClose }: Side
           ))}
         </nav>
 
-        <div className="p-3">
+        <div className="space-y-2 p-3">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2.5 rounded-[8px] px-2.5 py-[7px] text-left text-[13px] text-[#C5D4EA] hover:bg-white/5"
+          >
+            <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.8} />
+            <span>Keluar</span>
+          </button>
           <div className="rounded-[10px] bg-white/10 px-3 py-2.5">
             <p className="text-[11px] font-medium text-white/90">BozzMobil System</p>
             <p className="text-[10px] text-[#8BA3C7]">v2.1.0</p>
