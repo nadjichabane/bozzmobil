@@ -1,6 +1,6 @@
 import { Car, CircleDollarSign, FileWarning, Percent, Wallet } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { SALES, type Sale } from '../data/sales'
+import { SALES, type Sale, formatRupiahCompact } from '../data/sales'
 import { AddSaleModal } from '../components/AddSaleModal'
 import { FilterBar, type Filters } from '../components/FilterBar'
 import { SalesTable } from '../components/SalesTable'
@@ -45,6 +45,15 @@ export function SalesPage() {
   const start = (safePage - 1) * PAGE_SIZE
   const rows = filtered.slice(start, start + PAGE_SIZE)
 
+  const kpi = useMemo(() => {
+    const totalUnits = sales.length
+    const totalOmzet = sales.reduce((s, x) => s + x.price, 0)
+    const totalLaba = sales.reduce((s, x) => s + x.profit, 0)
+    const avgMargin = totalOmzet === 0 ? 0 : (totalLaba / totalOmzet) * 100
+    const pendingStnk = sales.filter((s) => s.status === 'Proses STNK').length
+    return { totalUnits, totalOmzet, totalLaba, avgMargin, pendingStnk }
+  }, [sales])
+
   const handleFilterChange = (next: Filters) => {
     setFilters(next)
     setPage(1)
@@ -55,37 +64,36 @@ export function SalesPage() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           title="TOTAL PENJUALAN (UNIT)"
-          value="28 Unit"
-          trend="↑ 27% dari bulan lalu"
+          value={`${kpi.totalUnits} Unit`}
+          trend="Terjual dari pipeline"
           icon={Car}
           iconBg="bg-[#2F80ED]"
         />
         <StatCard
           title="TOTAL OMZET"
-          value="Rp 6.380.000.000"
-          trend="↑ 18.6% dari bulan lalu"
+          value={formatRupiahCompact(kpi.totalOmzet)}
+          trend="Akumulasi harga jual"
           icon={Wallet}
           iconBg="bg-[#22C55E]"
         />
         <StatCard
           title="LABA KOTOR"
-          value="Rp 892.400.000"
-          trend="↑ 19.8% dari bulan lalu"
+          value={formatRupiahCompact(kpi.totalLaba)}
+          trend="Margin total"
           icon={CircleDollarSign}
           iconBg="bg-[#F59E0B]"
         />
         <StatCard
           title="RATA-RATA MARGIN"
-          value="14.0%"
-          trend="↑ 1.2% dari bulan lalu"
+          value={`${kpi.avgMargin.toFixed(1)}%`}
+          trend="Dari omzet"
           icon={Percent}
           iconBg="bg-[#8B5CF6]"
         />
         <StatCard
           title="PENDING STNK"
-          value="3 Unit"
-          trend="↓ 1 dari bulan lalu"
-          trendUp={false}
+          value={`${kpi.pendingStnk} Unit`}
+          trend="Dalam proses STNK"
           icon={FileWarning}
           iconBg="bg-[#06B6D4]"
         />

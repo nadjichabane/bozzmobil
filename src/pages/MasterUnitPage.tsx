@@ -20,19 +20,13 @@ type Row = MasterUnit & {
   stage: Stage
 }
 
-/** Gabungkan unit master dengan riwayat pembelian, inspeksi & penjualan */
+/** Gabungkan unit master dengan riwayat pembelian, inspeksi & penjualan (match by key) */
 function buildRows(): Row[] {
-  return MASTER_UNITS.map((u, i) => {
-    // cocokkan sumber unit berdasarkan nama/brand yang sama
-    const purchase = PURCHASES.find(
-      (p) => p.unit.toLowerCase().includes(u.brand.toLowerCase()) || p.unit.toLowerCase().includes(u.model.toLowerCase())
-    )
-    const sale = SALES.find(
-      (s) => s.unit.toLowerCase().includes(u.model.toLowerCase()) || s.unit.toLowerCase().includes(u.brand.toLowerCase())
-    )
-    const inspection = INSPECTIONS.find((ins) => ins.unit.toLowerCase().includes(u.model.toLowerCase()))
-    const plate = purchase?.plate ?? sale?.plate ?? `B ${9000 + i} ABC`
-    return { ...u, plate, stage: { purchase, inspection, sale } }
+  return MASTER_UNITS.map((u) => {
+    const purchase = PURCHASES.find((p) => p.id === u.id)
+    const sale = SALES.find((s) => s.id === u.id)
+    const inspection = INSPECTIONS.find((ins) => ins.id === u.id)
+    return { ...u, plate: u.car.plate, stage: { purchase, inspection, sale } }
   })
 }
 

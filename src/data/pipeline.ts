@@ -80,7 +80,7 @@ export const LEAD_CARS = PIPELINE.filter(
 )
 
 export const INSPECTION_CARS = PIPELINE.filter(
-  (c) => c.stage === 'inspecting' || c.stage === 'rejected' || c.stage === 'purchasing'
+  (c) => c.stage !== 'lead'
 )
 
 export const PURCHASE_CARS = PIPELINE.filter((c) => c.stage !== 'lead' && c.stage !== 'rejected')
