@@ -1,37 +1,30 @@
 import {
-  BarChart3,
-  Car,
   CarFront,
-  FileSpreadsheet,
-  FileText,
-  FolderOpen,
   LayoutDashboard,
-  Landmark,
   Package,
-  Repeat,
+  Scale,
   ShoppingBag,
-  Sparkles,
+  UserCheck,
+  UserPlus,
   Users,
+  UsersRound,
+  UploadCloud,
   Wallet,
   type LucideIcon,
 } from 'lucide-react'
 
 export type NavId =
   | 'dashboard'
-  | 'master-unit'
-  | 'master-supplier'
-  | 'master-finance'
-  | 'master-customer'
-  | 'pembelian'
-  | 'penjualan'
-  | 'trade-in'
-  | 'spk'
-  | 'dokumen'
-  | 'inventory'
-  | 'rekonsiliasi'
-  | 'biaya'
-  | 'laporan'
-  | 'ai-analytics'
+  | 'crm'
+  | 'kendaraan'
+  | 'transaksi'
+  | 'absensi'
+  | 'gudang'
+  | 'komparasi'
+  | 'user'
+  | 'keuangan'
+  | 'hr'
+  | 'migrasi'
 
 type NavItem = {
   id: NavId
@@ -47,48 +40,33 @@ type NavSection = {
 
 const SECTIONS: NavSection[] = [
   {
-    title: 'DASHBOARD',
-    items: [{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }],
+    title: 'BERANDA',
+    items: [{ id: 'dashboard', label: 'Dashboard & Reporting', icon: LayoutDashboard }],
   },
   {
-    title: 'MASTER DATA',
+    title: 'MODUL UTAMA',
     items: [
-      { id: 'master-unit', label: 'Master Unit', icon: CarFront },
-      { id: 'master-supplier', label: 'Master Supplier', icon: Car },
-      { id: 'master-finance', label: 'Master Finance', icon: Landmark },
-      { id: 'master-customer', label: 'Master Customer', icon: Users },
+      { id: 'crm', label: 'CRM & Customer', icon: UsersRound },
+      { id: 'kendaraan', label: 'Manajemen Kendaraan', icon: CarFront },
+      { id: 'transaksi', label: 'Pembelian & Penjualan', icon: ShoppingBag },
     ],
   },
   {
-    title: 'TRANSAKSI',
+    title: 'OPERASI & KEUANGAN',
     items: [
-      { id: 'pembelian', label: 'Pembelian', icon: ShoppingBag },
-      { id: 'penjualan', label: 'Penjualan', icon: FileSpreadsheet },
-      { id: 'trade-in', label: 'Trade In', icon: Repeat },
-      { id: 'spk', label: 'SPK', icon: FileText },
+      { id: 'absensi', label: 'Absensi Karyawan', icon: UserCheck },
+      { id: 'gudang', label: 'Gudang / Inventory', icon: Package },
+      { id: 'komparasi', label: 'Komparasi Harga', icon: Scale },
+      { id: 'keuangan', label: 'Laporan Keuangan', icon: Wallet },
     ],
   },
   {
-    title: 'DOKUMEN & INVENTORY',
+    title: 'SDM & SISTEM',
     items: [
-      { id: 'dokumen', label: 'Dokumen Kendaraan', icon: FolderOpen },
-      { id: 'inventory', label: 'Inventory', icon: Package },
+      { id: 'hr', label: 'Human Resource', icon: Users },
+      { id: 'user', label: 'User & Access', icon: UserPlus },
+      { id: 'migrasi', label: 'Migrasi & Integrasi', icon: UploadCloud },
     ],
-  },
-  {
-    title: 'ACCOUNTING',
-    items: [
-      { id: 'rekonsiliasi', label: 'Rekonsiliasi', icon: Repeat },
-      { id: 'biaya', label: 'Biaya & Pengeluaran', icon: Wallet },
-    ],
-  },
-  {
-    title: 'LAPORAN',
-    items: [{ id: 'laporan', label: 'Laporan', icon: BarChart3 }],
-  },
-  {
-    title: 'AI & TOOLS',
-    items: [{ id: 'ai-analytics', label: 'AI Analytics', icon: Sparkles, badge: 'New' }],
   },
 ]
 

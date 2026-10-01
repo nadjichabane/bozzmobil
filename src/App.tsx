@@ -1,56 +1,44 @@
 import { useState } from 'react'
 import { Header } from './components/Header'
 import { Sidebar, type NavId } from './components/Sidebar'
-import { SalesPage } from './pages/SalesPage'
 import { DashboardPage } from './pages/DashboardPage'
-import { MasterUnitPage } from './pages/MasterUnitPage'
-import { SupplierPage } from './pages/SupplierPage'
-import { FinancePage } from './pages/FinancePage'
 import { CustomerPage } from './pages/CustomerPage'
-import { PembelianPage } from './pages/PembelianPage'
-import { TradeInPage } from './pages/TradeInPage'
-import { SpkPage } from './pages/SpkPage'
-import { DokumenPage } from './pages/DokumenPage'
-import { InventoryPage } from './pages/InventoryPage'
-import { RekonsiliasiPage } from './pages/RekonsiliasiPage'
-import { BiayaPage } from './pages/BiayaPage'
-import { LaporanPage } from './pages/LaporanPage'
-import { AiAnalyticsPage } from './pages/AiAnalyticsPage'
+import { MasterUnitPage } from './pages/MasterUnitPage'
+import { TransaksiPage } from './pages/TransaksiPage'
+import { AbsensiPage } from './pages/AbsensiPage'
+import { GudangPage } from './pages/GudangPage'
+import { KomparasiPage } from './pages/KomparasiPage'
+import { LaporanKeuanganPage } from './pages/LaporanKeuanganPage'
+import { UserPage } from './pages/UserPage'
+import { HrPage } from './pages/HrPage'
+import { MigrasiPage } from './pages/MigrasiPage'
 
 const PAGE_COPY: Record<NavId, { title: string; subtitle: string }> = {
-  dashboard: { title: 'Dashboard', subtitle: 'Ringkasan performa dealer hari ini' },
-  'master-unit': { title: 'Master Unit', subtitle: 'Kelola data unit kendaraan' },
-  'master-supplier': { title: 'Master Supplier', subtitle: 'Kelola data supplier unit' },
-  'master-finance': { title: 'Master Finance', subtitle: 'Kelola mitra pembiayaan' },
-  'master-customer': { title: 'Master Customer', subtitle: 'Kelola database customer' },
-  pembelian: { title: 'Data Pembelian', subtitle: 'Kelola seluruh transaksi pembelian unit' },
-  penjualan: { title: 'Data Penjualan', subtitle: 'Kelola seluruh transaksi penjualan unit' },
-  'trade-in': { title: 'Trade In', subtitle: 'Kelola transaksi tukar tambah' },
-  spk: { title: 'SPK', subtitle: 'Kelola surat pesanan kendaraan' },
-  dokumen: { title: 'Dokumen Kendaraan', subtitle: 'Pantau kelengkapan STNK dan BPKB' },
-  inventory: { title: 'Inventory', subtitle: 'Stok unit yang tersedia di dealer' },
-  rekonsiliasi: { title: 'Rekonsiliasi', subtitle: 'Cocokkan mutasi bank dan transaksi' },
-  biaya: { title: 'Biaya & Pengeluaran', subtitle: 'Catat biaya operasional dealer' },
-  laporan: { title: 'Laporan', subtitle: 'Laporan penjualan, laba, dan stok' },
-  'ai-analytics': { title: 'AI Analytics', subtitle: 'Insight prediktif performa penjualan' },
+  dashboard: { title: 'Dashboard & Reporting', subtitle: 'Ringkasan operasional, transaksi, inventaris, dan absensi' },
+  crm: { title: 'CRM & Customer Management', subtitle: 'Profil pelanggan, kontak, riwayat transaksi, pencarian & penyaringan' },
+  kendaraan: { title: 'Manajemen Kendaraan', subtitle: 'Unit, nopol, detail, status, harga beli & jual' },
+  transaksi: { title: 'Pembelian & Penjualan', subtitle: 'Transaksi, relasi transaksi, harga & margin' },
+  absensi: { title: 'Absensi Karyawan', subtitle: 'Kehadiran, waktu masuk/keluar, rekap monitoring' },
+  gudang: { title: 'Gudang / Inventory Barang', subtitle: 'Stok, barang masuk & keluar, histori, ketersediaan' },
+  komparasi: { title: 'Komparasi Harga', subtitle: 'Bandingkan harga antar sumber & vendor sebelum pembelian' },
+  user: { title: 'User & Access Management', subtitle: 'Akun pengguna dan pembatasan akses per peran' },
+  keuangan: { title: 'Laporan Keuangan', subtitle: 'Pemasukan, pengeluaran, rekapitulasi & arus kas' },
+  hr: { title: 'Human Resource', subtitle: 'Profil, jabatan, departemen, status kepegawaian & riwayat' },
+  migrasi: { title: 'Migrasi & Integrasi Data', subtitle: 'Migrasi dari Analytics Bozzmobil & spreadsheet, pemetaan field' },
 }
 
 const PAGES: Record<NavId, React.ReactNode> = {
   dashboard: <DashboardPage />,
-  'master-unit': <MasterUnitPage />,
-  'master-supplier': <SupplierPage />,
-  'master-finance': <FinancePage />,
-  'master-customer': <CustomerPage />,
-  pembelian: <PembelianPage />,
-  penjualan: <SalesPage />,
-  'trade-in': <TradeInPage />,
-  spk: <SpkPage />,
-  dokumen: <DokumenPage />,
-  inventory: <InventoryPage />,
-  rekonsiliasi: <RekonsiliasiPage />,
-  biaya: <BiayaPage />,
-  laporan: <LaporanPage />,
-  'ai-analytics': <AiAnalyticsPage />,
+  crm: <CustomerPage />,
+  kendaraan: <MasterUnitPage />,
+  transaksi: <TransaksiPage />,
+  absensi: <AbsensiPage />,
+  gudang: <GudangPage />,
+  komparasi: <KomparasiPage />,
+  user: <UserPage />,
+  keuangan: <LaporanKeuanganPage />,
+  hr: <HrPage />,
+  migrasi: <MigrasiPage />,
 }
 
 export default function App() {
