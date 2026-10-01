@@ -5,14 +5,27 @@ import {
   LEAD_SOURCES,
   LEAD_STATUSES,
   type Lead,
-  type LeadInput,
+  type LeadSource,
+  type LeadStatus,
 } from '../data/leads'
+import { PURCHASES } from '../data/purchases'
+import { INSPECTIONS } from '../data/inspections'
 import { formatRupiah } from '../data/sales'
 import { Pagination } from '../components/Pagination'
 
 const PAGE_SIZE = 8
 
-const emptyForm: LeadInput = {
+/** Plat dipakai lebih dari satu unit → perlu tracking */
+const duplicatePlates = new Set(
+  LEADS.map((l) => l.plate).filter((p, _, arr) => arr.indexOf(p) !== arr.lastIndexOf(p)),
+)
+
+const invoiceFor = (id: string) => PURCHASES.find((p) => p.id === id)?.invoice
+const inspectionFor = (id: string) => INSPECTIONS.find((i) => i.id === id)
+
+type LeadForm = Omit<Lead, 'id' | 'code' | 'createdAt'> & { mileage?: number; expectedPrice?: number }
+
+const emptyForm: LeadForm = {
   status: 'Baru',
   customer: '',
   phone: '',
@@ -30,12 +43,16 @@ const statusColor = (s: Lead['status']) => {
   switch (s) {
     case 'Baru':
       return 'bg-blue-50 text-blue-700'
-    case 'Dijadwalkan':
-      return 'bg-indigo-50 text-indigo-700'
     case 'Dalam Inspeksi':
       return 'bg-amber-50 text-amber-700'
-    case 'Selesai':
+    case 'Ditolak':
+      return 'bg-red-50 text-red-700'
+    case 'Lulus':
+      return 'bg-indigo-50 text-indigo-700'
+    case 'Terbeli':
       return 'bg-emerald-50 text-emerald-700'
+    case 'Terjual':
+      return 'bg-slate-100 text-slate-600'
     default:
       return 'bg-red-50 text-red-700'
   }
@@ -49,7 +66,7 @@ export function LeadsPage() {
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Lead | null>(leads[0])
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState<LeadInput>(emptyForm)
+  const [form, setForm] = useState<LeadForm>(emptyForm)
 
   const nextCode = () => {
     const n = leads.length + 1
@@ -60,8 +77,11 @@ export function LeadsPage() {
 
   const submitLead = () => {
     if (!form.customer.trim() || !form.plate.trim()) return
+    const { mileage, expectedPrice, ...rest } = form
     const lead: Lead = {
-      ...form,
+      ...rest,
+      mileage: mileage ?? 0,
+      expectedPrice: expectedPrice ?? 0,
       id: String(Date.now()),
       code: nextCode(),
       createdAt: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
@@ -96,21 +116,21 @@ export function LeadsPage() {
 
   const kpi = {
     total: leads.length,
-    scheduled: leads.filter((l) => l.status === 'Dijadwalkan').length,
-    inProgress: leads.filter((l) => l.status === 'Dalam Inspeksi').length,
-    done: leads.filter((l) => l.status === 'Selesai').length,
-    rejected: leads.filter((l) => l.status === 'Ditolak').length,
+    baru: leads.filter((l) => l.status === 'Baru').length,
+    dalamInspeksi: leads.filter((l) => l.status === 'Dalam Inspeksi').length,
+    ditolak: leads.filter((l) => l.status === 'Ditolak').length,
+    lulus: leads.filter((l) => l.status === 'Lulus').length,
   }
 
   const kpiCards = [
     { label: 'TOTAL LEADS', value: String(kpi.total), sub: 'mobil masuk untuk inspeksi', accent: true },
-    { label: 'DIJADWALKAN', value: String(kpi.scheduled), sub: 'menunggu jadwal inspeksi' },
-    { label: 'DALAM INSPEKSI', value: String(kpi.inProgress), sub: 'sedang dicek tim' },
-    { label: 'SELESAI', value: String(kpi.done), sub: 'inspeksi tuntas' },
-    { label: 'DITOLAK', value: String(kpi.rejected), sub: 'tidak direkomendasikan' },
+    { label: 'BARU', value: String(kpi.baru), sub: 'belum dijadwalkan' },
+    { label: 'DALAM INSPEKSI', value: String(kpi.dalamInspeksi), sub: 'sedang dicek tim' },
+    { label: 'DITOLAK', value: String(kpi.ditolak), sub: 'tidak direkomendasikan' },
+    { label: 'LULUS', value: String(kpi.lulus), sub: 'masuk proses pembelian' },
   ]
 
-  const set = <K extends keyof LeadInput>(key: K, value: LeadInput[K]) =>
+  const set = <K extends keyof LeadForm>(key: K, value: LeadForm[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
 
   return (
@@ -185,7 +205,12 @@ export function LeadsPage() {
                       <p className="text-[13px] text-slate-800">{l.carType}</p>
                       {l.mileage ? <p className="text-[11px] text-slate-400">{l.mileage.toLocaleString('id-ID')} km</p> : null}
                     </td>
-                    <td className="whitespace-nowrap px-4 font-mono text-[12.5px] text-slate-600">{l.plate}</td>
+                    <td className="whitespace-nowrap px-4 font-mono text-[12.5px] text-slate-600">
+                      {l.plate}
+                      {duplicatePlates.has(l.plate) && (
+                        <span className="ml-1.5 inline-block rounded bg-amber-100 px-1 py-px text-[9px] font-semibold text-amber-700">DUPL</span>
+                      )}
+                    </td>
                     <td className="px-4 text-[13px] text-slate-600">{l.year}</td>
                     <td className="px-4 text-[12px] text-slate-500">{l.source}</td>
                     <td className="px-4">
@@ -242,6 +267,10 @@ export function LeadsPage() {
               </div>
             )}
 
+            {duplicatePlates.has(selected.plate) && (
+              <PlateTracker plate={selected.plate} currentId={selected.id} leads={leads} />
+            )}
+
             <div className="mt-4 flex gap-2">
               <button type="button" className="flex-1 rounded-[8px] bg-primary px-3 py-2 text-[12.5px] font-semibold text-white hover:bg-primary-hover">
                 Jadwalkan Inspeksi
@@ -291,7 +320,7 @@ export function LeadsPage() {
                 <input type="number" value={form.mileage ?? ''} onChange={(e) => set('mileage', e.target.value ? Number(e.target.value) : undefined)} className={input} placeholder="opsional" />
               </Field>
               <Field label="Sumber Leads">
-                <select value={form.source} onChange={(e) => set('source', e.target.value as LeadInput['source'])} className={input}>
+                <select value={form.source} onChange={(e) => set('source', e.target.value as LeadSource)} className={input}>
                   {LEAD_SOURCES.map((s) => <option key={s}>{s}</option>)}
                 </select>
               </Field>
@@ -299,7 +328,7 @@ export function LeadsPage() {
                 <input type="number" value={form.expectedPrice ?? ''} onChange={(e) => set('expectedPrice', e.target.value ? Number(e.target.value) : undefined)} className={input} placeholder="opsional" />
               </Field>
               <Field label="Status Awal">
-                <select value={form.status} onChange={(e) => set('status', e.target.value as LeadInput['status'])} className={input}>
+                <select value={form.status} onChange={(e) => set('status', e.target.value as LeadStatus)} className={input}>
                   {LEAD_STATUSES.map((s) => <option key={s}>{s}</option>)}
                 </select>
               </Field>
@@ -345,6 +374,38 @@ function DetailRow({ label, value, mono }: { label: string; value: string; mono?
     <div className="flex justify-between gap-3">
       <span className="shrink-0 text-slate-400">{label}</span>
       <span className={`text-right text-slate-700 ${mono ? 'font-mono' : ''}`}>{value}</span>
+    </div>
+  )
+}
+
+function PlateTracker({ plate, currentId, leads }: { plate: string; currentId: string; leads: Lead[] }) {
+  const siblings = leads.filter((l) => l.plate === plate)
+  return (
+    <div className="mt-4 rounded-[8px] border border-amber-200 bg-amber-50 p-3">
+      <p className="mb-2 text-[11px] font-semibold text-amber-800">TRACKING NOPOL {plate}</p>
+      <div className="space-y-1.5">
+        {siblings.map((l) => {
+          const inv = invoiceFor(l.id)
+          const insp = inspectionFor(l.id)
+          const isCurrent = l.id === currentId
+          return (
+            <div
+              key={l.id}
+              className={`rounded-[6px] px-2.5 py-1.5 text-[12px] ${isCurrent ? 'bg-amber-100 ring-1 ring-amber-300' : 'bg-white/60'}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-slate-800">{l.carType} {l.year}</span>
+                <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${statusColor(l.status)}`}>{l.status}</span>
+              </div>
+              <div className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] text-slate-500">
+                {isCurrent && <span className="font-medium text-amber-700">● aktif</span>}
+                {inv && <span>INV {inv}</span>}
+                {insp && <span>INS {insp.code} · {insp.status}</span>}
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
