@@ -1,6 +1,7 @@
 import {
   CarFront,
   ClipboardCheck,
+  ClipboardPlus,
   LayoutDashboard,
   LogOut,
   Package,
@@ -21,6 +22,7 @@ export type NavId =
   | 'kendaraan'
   | 'transaksi'
   | 'inspeksi'
+  | 'leads'
   | 'absensi'
   | 'gudang'
   | 'komparasi'
@@ -48,8 +50,14 @@ const SECTIONS: NavSection[] = [
       { id: 'dashboard', label: 'Dashboard & Reporting', icon: LayoutDashboard },
       { id: 'kendaraan', label: 'Master Unit', icon: CarFront },
       { id: 'transaksi', label: 'Pembelian & Penjualan', icon: ShoppingBag },
-      { id: 'inspeksi', label: 'Inspeksi & Hasil', icon: ClipboardCheck },
       { id: 'crm', label: 'CRM & Customer', icon: UsersRound },
+    ],
+  },
+  {
+    title: 'INSPEKSI & LEADS',
+    items: [
+      { id: 'inspeksi', label: 'Inspeksi & Hasil', icon: ClipboardCheck },
+      { id: 'leads', label: 'Leads Inspeksi', icon: ClipboardPlus },
     ],
   },
   {

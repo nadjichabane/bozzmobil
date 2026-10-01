@@ -8,6 +8,7 @@ import { TransaksiPage } from './pages/TransaksiPage'
 import InspectionPage from './pages/InspectionPage'
 import { AbsensiPage } from './pages/AbsensiPage'
 import { GudangPage } from './pages/GudangPage'
+import { LeadsPage } from './pages/LeadsPage'
 import { KomparasiPage } from './pages/KomparasiPage'
 import { LaporanKeuanganPage } from './pages/LaporanKeuanganPage'
 import { UserPage } from './pages/UserPage'
@@ -19,7 +20,8 @@ const PAGE_COPY: Record<NavId, { title: string; subtitle: string }> = {
   crm: { title: 'CRM & Customer Management', subtitle: 'Profil pelanggan, kontak, riwayat transaksi, pencarian & penyaringan' },
   kendaraan: { title: 'Master Unit', subtitle: 'Semua unit & status terpusat: pembelian, inspeksi, penjualan' },
   transaksi: { title: 'Pembelian & Penjualan', subtitle: 'Transaksi, relasi transaksi, harga & margin' },
-  inspeksi: { title: 'Inspeksi & Hasil', subtitle: 'Item cek fisik, temuan, catatan, rekomendasi keputusan' },
+  inspeksi: { title: 'Inspeksi & Leads', subtitle: 'Item cek fisik, temuan, catatan, rekomendasi keputusan' },
+  leads: { title: 'Leads Inspeksi', subtitle: 'Daftar mobil yang akan diinspeksi & masuk antrian tim inspeksi' },
   absensi: { title: 'Absensi Karyawan', subtitle: 'Kehadiran, waktu masuk/keluar, rekap monitoring' },
   gudang: { title: 'Gudang / Inventory Barang', subtitle: 'Stok, barang masuk & keluar, histori, ketersediaan' },
   komparasi: { title: 'Komparasi Harga', subtitle: 'Bandingkan harga antar sumber & vendor sebelum pembelian' },
@@ -35,6 +37,7 @@ const PAGES: Record<NavId, React.ReactNode> = {
   kendaraan: <MasterUnitPage />,
   transaksi: <TransaksiPage />,
   inspeksi: <InspectionPage />,
+  leads: <LeadsPage />,
   absensi: <AbsensiPage />,
   gudang: <GudangPage />,
   komparasi: <KomparasiPage />,

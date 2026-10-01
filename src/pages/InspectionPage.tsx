@@ -58,9 +58,9 @@ export default function InspectionPage() {
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-4 md:p-6">
       {/* Page header */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-lg font-semibold text-slate-900">Inspeksi & Hasil</h1>
+        <h1 className="text-lg font-semibold text-slate-900">Inspeksi & Leads</h1>
         <p className="text-[12px] text-slate-400">
-          Item cek fisik, temuan, catatan, rekomendasi keputusan (sebelah kiri); detail hasil inspeksi (kanan)
+          Item cek fisik, temuan, catatan, rekomendasi keputusan; mobil masuk dari daftar Leads Inspeksi
         </p>
       </div>
 
