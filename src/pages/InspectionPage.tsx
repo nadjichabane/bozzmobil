@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
+import type { NavId } from '../components/Sidebar'
 import {
   INSPECTIONS,
   type Inspection,
@@ -30,7 +31,7 @@ function recommendationStyle(rec: string): string {
   return 'bg-red-100 text-red-700'
 }
 
-export default function InspectionPage() {
+export default function InspectionPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('Semua')
   const [selected, setSelected] = useState<Inspection>(INSPECTIONS[0])
@@ -333,7 +334,11 @@ export default function InspectionPage() {
 
           {/* footer actions */}
           <div className="mt-4 flex items-center gap-2">
-            <button className="rounded-lg bg-blue-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-700">
+            <button
+              type="button"
+              onClick={() => onNavigate('transaksi')}
+              className="rounded-lg bg-blue-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-blue-700"
+            >
               HUBUNGAN KE PO & TRANSAKSI
             </button>
             <button className="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-medium text-slate-500 hover:bg-slate-50">

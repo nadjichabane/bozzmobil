@@ -12,6 +12,7 @@ import { PURCHASES } from '../data/purchases'
 import { INSPECTIONS } from '../data/inspections'
 import { formatRupiah } from '../data/sales'
 import { Pagination } from '../components/Pagination'
+import type { NavId } from '../components/Sidebar'
 
 const PAGE_SIZE = 8
 
@@ -58,7 +59,7 @@ const statusColor = (s: Lead['status']) => {
   }
 }
 
-export function LeadsPage() {
+export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [leads, setLeads] = useState<Lead[]>(LEADS)
   const [query, setQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('Semua Status')
@@ -67,6 +68,25 @@ export function LeadsPage() {
   const [selected, setSelected] = useState<Lead | null>(leads[0])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<LeadForm>(emptyForm)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const scheduleInspection = () => {
+    if (!selected) return
+    setLeads((prev) =>
+      prev.map((l) =>
+        l.id === selected.id ? { ...l, status: 'Dalam Inspeksi' as const } : l,
+      ),
+    )
+    setSelected({ ...selected, status: 'Dalam Inspeksi' })
+    onNavigate('inspeksi')
+  }
+
+  const deleteLead = () => {
+    if (!selected) return
+    setLeads((prev) => prev.filter((l) => l.id !== selected.id))
+    setSelected(null)
+    setConfirmDelete(false)
+  }
 
   const nextCode = () => {
     const n = leads.length + 1
@@ -272,13 +292,46 @@ export function LeadsPage() {
             )}
 
             <div className="mt-4 flex gap-2">
-              <button type="button" className="flex-1 rounded-[8px] bg-primary px-3 py-2 text-[12.5px] font-semibold text-white hover:bg-primary-hover">
-                Jadwalkan Inspeksi
+              <button
+                type="button"
+                onClick={scheduleInspection}
+                disabled={selected.status === 'Dalam Inspeksi' || selected.status === 'Terjual'}
+                className="flex-1 rounded-[8px] bg-primary px-3 py-2 text-[12.5px] font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {selected.status === 'Dalam Inspeksi' ? 'Sedang Diinspeksi' : 'Jadwalkan Inspeksi'}
               </button>
-              <button type="button" className="rounded-[8px] border border-line px-3 py-2 text-[12.5px] font-medium text-slate-600 hover:bg-slate-50">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                className="rounded-[8px] border border-line px-3 py-2 text-[12.5px] font-medium text-red-600 hover:bg-red-50"
+              >
                 Hapus
               </button>
             </div>
+
+            {confirmDelete && (
+              <div className="mt-3 flex items-center justify-between rounded-[8px] border border-red-200 bg-red-50 p-3">
+                <p className="text-[12px] text-red-700">
+                  Hapus lead <b className="font-mono">{selected.code}</b> ({selected.carType} {selected.year})?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(false)}
+                    className="rounded-[6px] border border-line bg-white px-2.5 py-1 text-[11.5px] font-medium text-slate-600 hover:bg-slate-50"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={deleteLead}
+                    className="rounded-[6px] bg-red-600 px-2.5 py-1 text-[11.5px] font-semibold text-white hover:bg-red-700"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

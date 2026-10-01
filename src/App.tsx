@@ -31,27 +31,27 @@ const PAGE_COPY: Record<NavId, { title: string; subtitle: string }> = {
   migrasi: { title: 'Migrasi & Integrasi Data', subtitle: 'Migrasi dari Analytics Bozzmobil & spreadsheet, pemetaan field' },
 }
 
-const PAGES: Record<NavId, React.ReactNode> = {
-  dashboard: <DashboardPage />,
-  crm: <CustomerPage />,
-  kendaraan: <MasterUnitPage />,
-  transaksi: <TransaksiPage />,
-  inspeksi: <InspectionPage />,
-  leads: <LeadsPage />,
-  absensi: <AbsensiPage />,
-  gudang: <GudangPage />,
-  komparasi: <KomparasiPage />,
-  user: <UserPage />,
-  keuangan: <LaporanKeuanganPage />,
-  hr: <HrPage />,
-  migrasi: <MigrasiPage />,
-}
-
 export default function App() {
   const [active, setActive] = useState<NavId>('dashboard')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [desktopHidden, setDesktopHidden] = useState(false)
   const copy = PAGE_COPY[active]
+
+  const pages: Record<NavId, React.ReactNode> = {
+    dashboard: <DashboardPage />,
+    crm: <CustomerPage />,
+    kendaraan: <MasterUnitPage />,
+    transaksi: <TransaksiPage />,
+    inspeksi: <InspectionPage onNavigate={setActive} />,
+    leads: <LeadsPage onNavigate={setActive} />,
+    absensi: <AbsensiPage />,
+    gudang: <GudangPage />,
+    komparasi: <KomparasiPage />,
+    user: <UserPage />,
+    keuangan: <LaporanKeuanganPage />,
+    hr: <HrPage />,
+    migrasi: <MigrasiPage />,
+  }
 
   return (
     <div className="min-h-screen bg-page">
@@ -72,7 +72,7 @@ export default function App() {
           }}
         />
         <div className="px-4 py-5 lg:px-6">
-          {PAGES[active]}
+          {pages[active]}
         </div>
       </div>
     </div>
