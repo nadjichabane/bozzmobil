@@ -1,7 +1,10 @@
 import { Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { MASTER_UNITS, type MasterUnit } from '../data/masterUnits'
-import { formatRupiah } from '../data/sales'
+import { formatRupiah, formatRupiahCompact } from '../data/sales'
+import { Pagination } from '../components/Pagination'
+
+const PAGE_SIZE = 8
 
 export function MasterUnitPage() {
   const [units] = useState<MasterUnit[]>(MASTER_UNITS)
@@ -10,6 +13,7 @@ export function MasterUnitPage() {
   const [filterCondition, setFilterCondition] = useState('Semua Kondisi')
   const [filterYear, setFilterYear] = useState('Semua Tahun')
   const [filterColor, setFilterColor] = useState('Semua Warna')
+  const [page, setPage] = useState(1)
 
   const brands = ['Semua Brand', ...Array.from(new Set(units.map((u) => u.brand)))]
   const conditions = ['Semua Kondisi', 'Berkondisi Baik', 'Butuh Perbaikan Ringan', 'Butuh Perbaikan Besar']
@@ -26,11 +30,34 @@ export function MasterUnitPage() {
     return u.name.toLowerCase().includes(q) || u.brand.toLowerCase().includes(q) || u.model.toLowerCase().includes(q)
   })
 
+  const totalAvailable = units.filter((u) => u.available).length
+  const totalSold = units.length - totalAvailable
+  const totalMargin = units.reduce((s, u) => s + (u.sellingPrice - u.acquisitionPrice), 0)
+  const avgMargin = totalMargin / units.length
+  const avgMarginPct = totalMargin / units.reduce((s, u) => s + u.acquisitionPrice, 0)
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(page, pageCount)
+  const start = (safePage - 1) * PAGE_SIZE
+  const rows = filtered.slice(start, start + PAGE_SIZE)
+
   const conditionColor = (c: string) => {
     if (c === 'Berkondisi Baik') return 'bg-emerald-50 text-emerald-700'
     if (c === 'Butuh Perbaikan Ringan') return 'bg-amber-50 text-amber-700'
     return 'bg-red-50 text-red-700'
   }
+
+  const kpiCards = [
+    { label: 'TOTAL UNIT', value: String(units.length), sub: 'unit terdaftar' },
+    { label: 'TERSEDIA', value: String(totalAvailable), sub: 'unit siap jual' },
+    { label: 'TERJUAL', value: String(totalSold), sub: 'unit terjual' },
+    {
+      label: 'MARGIN RATA-RATA',
+      value: formatRupiahCompact(avgMargin),
+      sub: `${avgMarginPct.toFixed(1)}% dari harga beli`,
+      accent: true,
+    },
+  ]
 
   return (
     <div className="px-4 py-5 lg:px-6">
@@ -44,62 +71,133 @@ export function MasterUnitPage() {
         </button>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {kpiCards.map((c) => (
+          <div key={c.label} className="rounded-[12px] border border-line bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+            <p className="text-[10.5px] font-semibold tracking-[0.04em] text-slate-400">{c.label}</p>
+            <p className={`mt-1.5 text-[20px] font-bold leading-tight ${c.accent ? 'text-primary' : 'text-slate-900'}`}>{c.value}</p>
+            <p className="mt-1 text-[11px] text-slate-400">{c.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              setPage(1)
+            }}
             placeholder="Cari unit..."
             className="h-[38px] w-[240px] rounded-[8px] border border-line bg-white pl-9 pr-3 text-[13px] outline-none focus:border-primary"
           />
         </div>
-        <select value={filterBrand} onChange={(e) => setFilterBrand(e.target.value)} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
+        <select
+          value={filterBrand}
+          onChange={(e) => {
+            setFilterBrand(e.target.value)
+            setPage(1)
+          }}
+          className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700"
+        >
           {brands.map((b) => <option key={b}>{b}</option>)}
         </select>
-        <select value={filterCondition} onChange={(e) => setFilterCondition(e.target.value)} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
+        <select
+          value={filterCondition}
+          onChange={(e) => {
+            setFilterCondition(e.target.value)
+            setPage(1)
+          }}
+          className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700"
+        >
           {conditions.map((c) => <option key={c}>{c}</option>)}
         </select>
-        <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
+        <select
+          value={filterYear}
+          onChange={(e) => {
+            setFilterYear(e.target.value)
+            setPage(1)
+          }}
+          className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700"
+        >
           {years.map((y) => <option key={y}>{y}</option>)}
         </select>
-        <select value={filterColor} onChange={(e) => setFilterColor(e.target.value)} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
+        <select
+          value={filterColor}
+          onChange={(e) => {
+            setFilterColor(e.target.value)
+            setPage(1)
+          }}
+          className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700"
+        >
           {colors.map((c) => <option key={c}>{c}</option>)}
         </select>
+        <button
+          type="button"
+          className="h-[38px] rounded-[8px] border border-line bg-white px-4 text-[13px] font-medium text-slate-600 hover:bg-slate-50"
+        >
+          Filter
+        </button>
       </div>
 
-      <div className="rounded-[12px] border border-line bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="mt-4 overflow-hidden rounded-[12px] border border-line bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-left">
+          <table className="w-full min-w-[1100px] border-collapse text-left">
             <thead>
               <tr className="border-b border-line">
-                {['Unit', 'Brand', 'Tahun', 'Warna', 'Transmisi', 'CC', 'Harga Beli', 'Harga Jual', 'Margin', 'Kondisi', 'Stok'].map((h) => (
+                {['No', 'PRC', 'Foto', 'Informasi Unit', 'Harga Beli', 'Harga Jual', 'Margin', '%', 'Status', 'Aksi'].map((h) => (
                   <th key={h} className="whitespace-nowrap px-4 py-3 text-[11.5px] font-semibold text-slate-500">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map((u) => {
-                const margin = ((u.sellingPrice - u.acquisitionPrice) / u.acquisitionPrice * 100).toFixed(1)
+              {rows.map((u, i) => {
+                const margin = u.sellingPrice - u.acquisitionPrice
+                const marginPct = (margin / u.acquisitionPrice) * 100
                 return (
                   <tr key={u.id} className="h-[60px] border-b border-line last:border-0 hover:bg-slate-50">
-                    <td className="px-4"><span className="text-[13px] font-medium text-slate-900">{u.name}</span></td>
-                    <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">{u.brand}</td>
-                    <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">{u.year}</td>
-                    <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">{u.color}</td>
-                    <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">{u.transmission}</td>
-                    <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">{u.cc.toLocaleString('id-ID')}</td>
+                    <td className="px-4 text-[13px] text-slate-400">{start + i + 1}</td>
+                    <td className="whitespace-nowrap px-4 font-mono text-[12.5px] text-slate-500">{u.chassis.slice(0, 12)}</td>
+                    <td className="px-4">
+                      <img src={u.imageUrl} alt={u.name} className="h-10 w-16 rounded-[8px] object-cover" />
+                    </td>
+                    <td className="px-4">
+                      <p className="text-[13px] font-semibold text-slate-900">{u.name} {u.year}</p>
+                      <p className="text-[11px] text-slate-400">
+                        {u.color} · {u.transmission} · {u.cc.toLocaleString('id-ID')} cc
+                      </p>
+                    </td>
                     <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">{formatRupiah(u.acquisitionPrice)}</td>
                     <td className="whitespace-nowrap px-4 text-[13px] font-semibold text-slate-800">{formatRupiah(u.sellingPrice)}</td>
-                    <td className="whitespace-nowrap px-4 text-[13px] font-semibold text-emerald-600">+{margin}%</td>
-                    <td className="px-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${conditionColor(u.condition)}`}>{u.condition}</span></td>
-                    <td className="px-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${u.available ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{u.available ? 'Tersedia' : 'Terjual'}</span></td>
+                    <td className="whitespace-nowrap px-4 text-[13px] font-semibold text-emerald-600">{formatRupiah(margin)}</td>
+                    <td className="whitespace-nowrap px-4">
+                      <span className="rounded-[6px] bg-emerald-50 px-2 py-1 text-[12px] font-bold text-emerald-700">
+                        +{marginPct.toFixed(1)}%
+                      </span>
+                    </td>
+                    <td className="px-4">
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${u.available ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                        {u.available ? 'Tersedia' : 'Terjual'}
+                      </span>
+                      <p className={`mt-1 inline-block rounded-full px-2 py-px text-[10px] font-medium ${conditionColor(u.condition)}`}>{u.condition}</p>
+                    </td>
+                    <td className="px-4 text-[13px] text-primary">Lihat</td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
         </div>
+        <Pagination
+          page={safePage}
+          pageCount={pageCount}
+          from={filtered.length === 0 ? 0 : start + 1}
+          to={Math.min(start + PAGE_SIZE, filtered.length)}
+          total={filtered.length}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   )
