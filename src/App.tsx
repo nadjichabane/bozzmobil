@@ -5,6 +5,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { CustomerPage } from './pages/CustomerPage'
 import { MasterUnitPage } from './pages/MasterUnitPage'
 import { TransaksiPage } from './pages/TransaksiPage'
+import InspectionPage from './pages/InspectionPage'
 import { AbsensiPage } from './pages/AbsensiPage'
 import { GudangPage } from './pages/GudangPage'
 import { KomparasiPage } from './pages/KomparasiPage'
@@ -18,6 +19,7 @@ const PAGE_COPY: Record<NavId, { title: string; subtitle: string }> = {
   crm: { title: 'CRM & Customer Management', subtitle: 'Profil pelanggan, kontak, riwayat transaksi, pencarian & penyaringan' },
   kendaraan: { title: 'Manajemen Kendaraan', subtitle: 'Unit, nopol, detail, status, harga beli & jual' },
   transaksi: { title: 'Pembelian & Penjualan', subtitle: 'Transaksi, relasi transaksi, harga & margin' },
+  inspeksi: { title: 'Inspeksi & Hasil', subtitle: 'Item cek fisik, temuan, catatan, rekomendasi keputusan' },
   absensi: { title: 'Absensi Karyawan', subtitle: 'Kehadiran, waktu masuk/keluar, rekap monitoring' },
   gudang: { title: 'Gudang / Inventory Barang', subtitle: 'Stok, barang masuk & keluar, histori, ketersediaan' },
   komparasi: { title: 'Komparasi Harga', subtitle: 'Bandingkan harga antar sumber & vendor sebelum pembelian' },
@@ -32,6 +34,7 @@ const PAGES: Record<NavId, React.ReactNode> = {
   crm: <CustomerPage />,
   kendaraan: <MasterUnitPage />,
   transaksi: <TransaksiPage />,
+  inspeksi: <InspectionPage />,
   absensi: <AbsensiPage />,
   gudang: <GudangPage />,
   komparasi: <KomparasiPage />,
