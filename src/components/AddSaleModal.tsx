@@ -37,6 +37,7 @@ export function AddSaleModal({ open, onClose, onSubmit }: AddSaleModalProps) {
     onSubmit({
       id: crypto.randomUUID(),
       invoice,
+      idTransaksi: `TRX-2026-${String(Math.floor(Math.random() * 900) + 100)}`,
       date: now.toLocaleDateString('id-ID'),
       unit,
       plate: plate || 'B 0000 XXX',
@@ -48,6 +49,7 @@ export function AddSaleModal({ open, onClose, onSubmit }: AddSaleModalProps) {
       profit: Number(profit) || 0,
       status,
       completeness: status === 'Lunas' ? 100 : 70,
+      jenisTransaksi: 'Penjualan Unit',
       image: '/cars/serena.jpg',
       salesPerson: 'Rudi Hartono',
       car: makePipelineCar({ key: `manual-${crypto.randomUUID().slice(0, 8)}`, plate: plate || 'B 0000 XXX' }),

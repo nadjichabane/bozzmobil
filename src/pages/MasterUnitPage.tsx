@@ -240,6 +240,32 @@ export function MasterUnitPage() {
             </div>
 
             <div className="mt-4 border-t border-line pt-4">
+              <p className="mb-2 text-[12px] font-semibold text-slate-500">MASTER UNIT — STATUS TERAKHIR</p>
+              <div className="space-y-2">
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-400">Status Mobil</span>
+                  <span className="font-medium text-slate-800 text-right">{selected.statusMobilTerakhir}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-400">Tanggal Status</span>
+                  <span className="font-mono text-slate-600 text-right">{selected.tanggalStatusTerakhir}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-400">No. HP Customer</span>
+                  <span className="font-mono text-slate-600 text-right">{selected.noHPCustomer}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-400">Sumber</span>
+                  <span className="text-slate-600 text-right">{selected.sumber}</span>
+                </div>
+                <div className="rounded-[6px] bg-slate-50 p-2.5 text-[11px] text-slate-500">
+                  <p className="mb-1 font-semibold text-slate-400">INFORMASI STATUS TERAKHIR</p>
+                  {selected.informasiStatusTerakhir}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 border-t border-line pt-4">
               <p className="mb-2 text-[12px] font-semibold text-slate-500">Jejak Status</p>
               <div className="space-y-2">
                 <Jejak label="Pembelian" ok={!!selected.stage.purchase} detail={selected.stage.purchase ? `${selected.stage.purchase.invoice} · ${selected.stage.purchase.supplier}` : 'Belum tercatat'} />

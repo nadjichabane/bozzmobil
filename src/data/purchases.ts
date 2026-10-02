@@ -11,6 +11,7 @@ export type Purchase = {
   adminFee: number
   status: 'Selesai' | 'Diproses' | 'Dibatalkan'
   paymentMethod: 'Transfer' | 'Tunai'
+  jenisTransaksi: 'Pembelian Unit' | 'Pembelian Sparepart' | 'Pembelian Jasa'
   image: string
   car: PipelineCar
 }
@@ -34,6 +35,7 @@ export const PURCHASES: Purchase[] = PURCHASE_CARS.map((c, i) => ({
   adminFee: Math.round(c.buyPrice * 0.01),
   status: c.stage === 'available' || c.stage === 'sold' ? 'Selesai' : 'Diproses',
   paymentMethod: i % 2 === 0 ? 'Transfer' : 'Tunai',
+  jenisTransaksi: i % 3 === 0 ? 'Pembelian Unit' : i % 3 === 1 ? 'Pembelian Unit' : 'Pembelian Jasa',
   image: c.image,
   car: c,
 }))

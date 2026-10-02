@@ -6,6 +6,7 @@ export type SaleStatus = 'Lunas' | 'Proses STNK' | 'Proses BPKB'
 export type Sale = {
   id: string
   invoice: string
+  idTransaksi: string
   date: string
   unit: string
   plate: string
@@ -17,6 +18,7 @@ export type Sale = {
   profit: number
   status: SaleStatus
   completeness: number
+  jenisTransaksi: 'Penjualan Unit' | 'Trade In' | 'Rekonsiliasi'
   image: string
   salesPerson: string
   car: PipelineCar
@@ -30,6 +32,7 @@ const SALES_STATUS: SaleStatus[] = ['Lunas', 'Proses STNK', 'Proses BPKB']
 export const SALES: Sale[] = SOLD_CARS.map((c, i) => ({
   id: c.key,
   invoice: `INV-2026-${String(31 - i).padStart(4, '0')}`,
+  idTransaksi: `TRX-2026-${String(100 + i)}`,
   date: `${String(31 - i)}/08/2026`,
   unit: `${c.brand} ${c.model} ${c.transmission === 'Otomatis' ? 'AT' : 'MT'} ${c.year}`,
   plate: c.plate,
@@ -41,6 +44,7 @@ export const SALES: Sale[] = SOLD_CARS.map((c, i) => ({
   profit: Math.round(c.sellPrice - c.buyPrice),
   status: SALES_STATUS[i % SALES_STATUS.length],
   completeness: i % 3 === 0 ? 100 : i % 3 === 1 ? 80 : 60,
+  jenisTransaksi: i % 4 === 0 ? 'Trade In' : 'Penjualan Unit',
   image: c.image,
   salesPerson: SALES_PERSONS[i % SALES_PERSONS.length],
   car: c,
