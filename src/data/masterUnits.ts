@@ -35,7 +35,7 @@ export type MasterUnit = {
   car: PipelineCar
 }
 
-function statusForStage(stage: Stage): {
+export function statusForStage(stage: Stage): {
   label: string
   info: string
   date: string

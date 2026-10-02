@@ -1,6 +1,6 @@
 import { Plus, Search } from 'lucide-react'
 import { useState } from 'react'
-import { PURCHASES, type Purchase } from '../data/purchases'
+import { usePipelineData } from '../context/usePipelineData'
 import { formatRupiah } from '../data/sales'
 import { Pagination } from '../components/Pagination'
 
@@ -13,7 +13,7 @@ const STATUS_COLOR: Record<string, string> = {
 }
 
 export function PembelianPageContent() {
-  const [purchases] = useState<Purchase[]>(PURCHASES)
+  const { purchases, advance } = usePipelineData()
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
 
@@ -64,7 +64,7 @@ export function PembelianPageContent() {
           <table className="w-full min-w-[850px] border-collapse text-left">
             <thead>
               <tr className="border-b border-line">
-                {['No. Invoice', 'Tanggal', 'Unit', 'Nopol', 'Supplier', 'Jenis Transaksi', 'Harga Beli', 'Biaya Admin', 'Metode Bayar', 'Status'].map((h) => (
+                {['No. Invoice', 'Tanggal', 'Unit', 'Nopol', 'Supplier', 'Jenis Transaksi', 'Harga Beli', 'Biaya Admin', 'Metode Bayar', 'Status', 'Aksi'].map((h) => (
                   <th key={h} className="whitespace-nowrap px-4 py-3 text-[11.5px] font-semibold text-slate-500">{h}</th>
                 ))}
               </tr>
@@ -82,6 +82,17 @@ export function PembelianPageContent() {
                   <td className="whitespace-nowrap px-4 text-[13px] text-slate-500">{formatRupiah(p.adminFee)}</td>
                   <td className="whitespace-nowrap px-4"><span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${p.paymentMethod === 'Transfer' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>{p.paymentMethod}</span></td>
                   <td className="px-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_COLOR[p.status]}`}>{p.status}</span></td>
+                  <td className="px-4 pr-4 text-right">
+                    {p.status === 'Diproses' && p.car.stage === 'purchasing' && (
+                      <button
+                        type="button"
+                        onClick={() => advance(p.id, 'available')}
+                        className="rounded-[6px] bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600"
+                      >
+                        Selesaikan
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

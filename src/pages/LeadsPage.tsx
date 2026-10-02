@@ -1,30 +1,26 @@
 import { Plus, Search, X } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
-  LEADS,
   LEAD_SOURCES,
   LEAD_STATUSES,
   type Lead,
   type LeadSource,
   type LeadStatus,
 } from '../data/leads'
-import { PURCHASES } from '../data/purchases'
-import { INSPECTIONS } from '../data/inspections'
+import { usePipelineData, newPipelineCar } from '../context/usePipelineData'
+import { type PipelineCar } from '../data/pipeline'
+import { type Purchase } from '../data/purchases'
+import { type Inspection } from '../data/inspections'
 import { formatRupiah } from '../data/sales'
 import { Pagination } from '../components/Pagination'
 import type { NavId } from '../components/Sidebar'
 
 const PAGE_SIZE = 8
 
-/** Plat dipakai lebih dari satu unit → perlu tracking */
-const duplicatePlates = new Set(
-  LEADS.map((l) => l.plate).filter((p, _, arr) => arr.indexOf(p) !== arr.lastIndexOf(p)),
-)
-
-const invoiceFor = (id: string) => PURCHASES.find((p) => p.id === id)?.invoice
-const inspectionFor = (id: string) => INSPECTIONS.find((i) => i.id === id)
-
-type LeadForm = Omit<Lead, 'id' | 'code' | 'createdAt' | 'mileage' | 'expectedPrice'> & { mileage?: number; expectedPrice?: number }
+type LeadForm = Omit<Lead, 'id' | 'code' | 'createdAt' | 'mileage' | 'expectedPrice'> & {
+  mileage?: number
+  expectedPrice?: number
+}
 
 const emptyForm: LeadForm = {
   status: 'Baru',
@@ -59,8 +55,24 @@ const statusColor = (s: Lead['status']) => {
   }
 }
 
+/** Plat dipakai lebih dari satu unit → perlu tracking */
+export function useDuplicatePlates(leads: Lead[]) {
+  return useMemo(
+    () => new Set(leads.map((l) => l.plate).filter((p, _, arr) => arr.indexOf(p) !== arr.lastIndexOf(p))),
+    [leads],
+  )
+}
+
 export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
-  const [leads, setLeads] = useState<Lead[]>(LEADS)
+  const {
+    leads,
+    inspections,
+    purchases,
+    advance,
+    addCar,
+    removeCar,
+  } = usePipelineData()
+
   const [query, setQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('Semua Status')
   const [filterSource, setFilterSource] = useState('Semua Sumber')
@@ -70,20 +82,18 @@ export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [form, setForm] = useState<LeadForm>(emptyForm)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
+  const duplicatePlates = useDuplicatePlates(leads)
+
   const scheduleInspection = () => {
     if (!selected) return
-    setLeads((prev) =>
-      prev.map((l) =>
-        l.id === selected.id ? { ...l, status: 'Dalam Inspeksi' as const } : l,
-      ),
-    )
+    advance(selected.id, 'inspecting')
     setSelected({ ...selected, status: 'Dalam Inspeksi' })
     onNavigate('inspeksi')
   }
 
   const deleteLead = () => {
     if (!selected) return
-    setLeads((prev) => prev.filter((l) => l.id !== selected.id))
+    removeCar(selected.id)
     setSelected(null)
     setConfirmDelete(false)
   }
@@ -97,17 +107,35 @@ export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
 
   const submitLead = () => {
     if (!form.customer.trim() || !form.plate.trim()) return
-    const { mileage, expectedPrice, ...rest } = form
-    const lead: Lead = {
-      ...rest,
-      mileage: mileage ?? 0,
-      expectedPrice: expectedPrice ?? 0,
-      id: String(Date.now()),
+    const car: Omit<PipelineCar, 'key'> = newPipelineCar({
+      customer: form.customer,
+      phone: form.phone,
+      address: form.address,
+      plate: form.plate,
+      carType: form.carType,
+      year: form.year,
+      mileage: form.mileage ?? undefined,
+      source: form.source,
+      expectedPrice: form.expectedPrice ?? undefined,
+      note: form.note,
+    })
+    const key = `new-${Date.now()}`
+    addCar({ ...car, key })
+    setSelected({
+      id: key,
       code: nextCode(),
+      status: form.status,
+      customer: form.customer,
+      phone: form.phone,
+      address: form.address,
+      plate: form.plate,
+      carType: form.carType,
+      year: form.year,
+      mileage: form.mileage ?? 0,
+      source: form.source,
+      expectedPrice: form.expectedPrice ?? 0,
       createdAt: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-    }
-    setLeads((prev) => [lead, ...prev])
-    setSelected(lead)
+    })
     setShowForm(false)
     setForm(emptyForm)
     setPage(1)
@@ -288,7 +316,7 @@ export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             )}
 
             {duplicatePlates.has(selected.plate) && (
-              <PlateTracker plate={selected.plate} currentId={selected.id} leads={leads} />
+              <PlateTracker plate={selected.plate} currentId={selected.id} leads={leads} purchases={purchases} inspections={inspections} />
             )}
 
             <div className="mt-4 flex gap-2">
@@ -431,8 +459,12 @@ function DetailRow({ label, value, mono }: { label: string; value: string; mono?
   )
 }
 
-function PlateTracker({ plate, currentId, leads }: { plate: string; currentId: string; leads: Lead[] }) {
+function PlateTracker({ plate, currentId, leads, purchases, inspections }: {
+  plate: string; currentId: string; leads: Lead[]; purchases: Purchase[]; inspections: Inspection[]
+}) {
   const siblings = leads.filter((l) => l.plate === plate)
+  const invoiceFor = (id: string) => purchases.find((p) => p.id === id)?.invoice
+  const inspectionFor = (id: string) => inspections.find((i) => i.id === id)
   return (
     <div className="mt-4 rounded-[8px] border border-amber-200 bg-amber-50 p-3">
       <p className="mb-2 text-[11px] font-semibold text-amber-800">TRACKING NOPOL {plate}</p>

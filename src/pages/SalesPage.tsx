@@ -1,6 +1,7 @@
 import { Car, CircleDollarSign, FileWarning, Percent, Wallet } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { SALES, type Sale, formatRupiahCompact } from '../data/sales'
+import { formatRupiahCompact } from '../data/sales'
+import { usePipelineData } from '../context/usePipelineData'
 import { AddSaleModal } from '../components/AddSaleModal'
 import { FilterBar, type Filters } from '../components/FilterBar'
 import { SalesTable } from '../components/SalesTable'
@@ -17,7 +18,7 @@ const INITIAL_FILTERS: Filters = {
 }
 
 export function SalesPage() {
-  const [sales, setSales] = useState<Sale[]>(SALES)
+  const { sales, addCar } = usePipelineData()
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS)
   const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
@@ -120,7 +121,7 @@ export function SalesPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSubmit={(sale) => {
-          setSales((prev) => [sale, ...prev])
+          addCar(sale.car)
           setPage(1)
         }}
       />

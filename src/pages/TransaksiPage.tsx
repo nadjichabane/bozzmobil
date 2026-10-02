@@ -3,6 +3,8 @@ import { SalesPage } from './SalesPage'
 import { PembelianPageContent } from './PembelianContent'
 import { PembelianForm } from '../components/PembelianForm'
 import { PenjualanForm } from '../components/PenjualanForm'
+import { usePipelineData } from '../context/usePipelineData'
+import { MASTER_UNITS } from '../data/masterUnits'
 
 type TabId = 'sales' | 'pembelian' | 'form-penjualan' | 'form-pembelian'
 
@@ -15,6 +17,9 @@ const TABS: { id: TabId; label: string }[] = [
 
 export function TransaksiPage() {
   const [tab, setTab] = useState<TabId>('sales')
+  const { advance, masterUnits: liveMasterUnits } = usePipelineData()
+
+  const selectedUnitKey = liveMasterUnits[0]?.id ?? MASTER_UNITS[0]?.id
 
   return (
     <div>
@@ -35,8 +40,20 @@ export function TransaksiPage() {
 
       {tab === 'sales' && <SalesPage />}
       {tab === 'pembelian' && <PembelianPageContent />}
-      {tab === 'form-penjualan' && <PenjualanForm />}
-      {tab === 'form-pembelian' && <PembelianForm />}
+      {tab === 'form-penjualan' && (
+        <PenjualanForm
+          onProcess={() => {
+            if (selectedUnitKey) advance(selectedUnitKey, 'sold')
+          }}
+        />
+      )}
+      {tab === 'form-pembelian' && (
+        <PembelianForm
+          onProcess={() => {
+            if (selectedUnitKey) advance(selectedUnitKey, 'available')
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
 import type { NavId } from '../components/Sidebar'
 import {
-  INSPECTIONS,
   type Inspection,
   type Finding,
   countBySeverity,
   recommend,
 } from '../data/inspections'
+import { usePipelineData } from '../context/usePipelineData'
 import { formatRupiah } from '../data/sales'
 
 const INPUT =
@@ -32,28 +32,35 @@ function recommendationStyle(rec: string): string {
 }
 
 export default function InspectionPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
+  const { inspections, advance } = usePipelineData()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('Semua')
-  const [selected, setSelected] = useState<Inspection>(INSPECTIONS[0])
-  const [reason, setReason] = useState(selected.reason)
+  const [selected, setSelected] = useState<Inspection | null>(inspections[0])
+  const [reason, setReason] = useState(selected?.reason ?? '')
 
   const q = query.trim().toLowerCase()
   const statuses = ['Semua', 'Dalam Inspeksi', 'Selesai', 'Draft']
   const list = useMemo(
     () =>
-      INSPECTIONS.filter(i => {
+      inspections.filter(i => {
         const matchQ = !q || `${i.id} ${i.code} ${i.unit} ${i.customer}`.toLowerCase().includes(q)
         const matchStatus = status === 'Semua' || i.status === status
         return matchQ && matchStatus
       }),
-    [q, status]
+    [q, status, inspections]
   )
 
   const rec = useMemo(
-    () => recommend({ ...countBySeverity(selected.findings) }),
+    () => (selected ? recommend({ ...countBySeverity(selected.findings) }) : ''),
     [selected]
   )
-  const openFindings = selected.findings.filter(f => f.severity !== 'Catatan')
+  const openFindings = selected?.findings.filter(f => f.severity !== 'Catatan') ?? []
+
+  const doAdvance = (next: 'purchasing' | 'rejected') => {
+    if (!selected) return
+    advance(selected.id, next)
+    onNavigate(next === 'purchasing' ? 'transaksi' : 'leads')
+  }
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-4 md:p-6">
@@ -98,7 +105,7 @@ export default function InspectionPage({ onNavigate }: { onNavigate: (id: NavId)
             )}
             {list.map(i => {
               const s = countBySeverity(i.findings)
-              const active = selected.id === i.id
+              const active = selected?.id === i.id
               return (
                 <button
                   key={i.id}
@@ -138,6 +145,7 @@ export default function InspectionPage({ onNavigate }: { onNavigate: (id: NavId)
         </section>
 
         {/* ---------- RIGHT: Detail Result ---------- */}
+        {selected ? (
         <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           {/* detail header */}
           <div className="flex items-start justify-between gap-3">
@@ -168,7 +176,7 @@ export default function InspectionPage({ onNavigate }: { onNavigate: (id: NavId)
               <span
                 className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${recommendationStyle(rec)}`}
               >
-                {rec}
+                {rec || '—'}
               </span>
             </span>
           </div>
@@ -295,17 +303,21 @@ export default function InspectionPage({ onNavigate }: { onNavigate: (id: NavId)
               <h5 className="text-[11px] font-semibold text-slate-500">KEPUTUSAN</h5>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <button
+                  type="button"
+                  onClick={() => doAdvance('purchasing')}
                   className={
                     'rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white ' +
-                    (rec === 'Certified'
+                    ((rec === 'Certified' || rec === 'Value')
                       ? 'bg-emerald-500 hover:bg-emerald-600'
                       : 'cursor-not-allowed bg-slate-300')
                   }
-                  disabled={rec !== 'Certified'}
+                  disabled={rec !== 'Certified' && rec !== 'Value'}
                 >
-                  CERTIFIED
+                  CERTIFIED / LULUS
                 </button>
                 <button
+                  type="button"
+                  onClick={() => doAdvance('purchasing')}
                   className={
                     'rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white ' +
                     (rec === 'Value'
@@ -317,18 +329,22 @@ export default function InspectionPage({ onNavigate }: { onNavigate: (id: NavId)
                   VALUE
                 </button>
                 <button
+                  type="button"
+                  onClick={() => doAdvance('rejected')}
                   className={
                     'rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white ' +
-                    (rec === 'Tidak Direkomendasikan'
+                    ((rec === 'Tidak Direkomendasikan' || selected.car.stage === 'inspecting')
                       ? 'bg-red-500 hover:bg-red-600'
                       : 'cursor-not-allowed bg-slate-300')
                   }
-                  disabled={rec !== 'Tidak Direkomendasikan'}
+                  disabled={rec === 'Certified' || rec === 'Value'}
                 >
                   REJECT
                 </button>
               </div>
-              <p className="mt-2 text-[10px] text-slate-400">Rekomendasi berdasarkan jumlah temuan major.</p>
+              <p className="mt-2 text-[10px] text-slate-400">
+                Rekomendasi berdasarkan jumlah temuan major. Lulus → masuk pembelian; Reject → pipeline berakhir.
+              </p>
             </div>
           </div>
 
@@ -346,6 +362,13 @@ export default function InspectionPage({ onNavigate }: { onNavigate: (id: NavId)
             </button>
           </div>
         </section>
+        ) : (
+          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="py-10 text-center text-[13px] text-slate-400">
+              Pilih inspeksi dari daftar untuk melihat detail.
+            </p>
+          </section>
+        )}
       </div>
     </div>
   )

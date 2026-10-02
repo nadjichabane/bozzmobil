@@ -1,9 +1,10 @@
 import { Eye, Plus, Search } from 'lucide-react'
-import { useState } from 'react'
-import { MASTER_UNITS, type MasterUnit } from '../data/masterUnits'
-import { PURCHASES, type Purchase } from '../data/purchases'
-import { SALES, type Sale } from '../data/sales'
-import { INSPECTIONS, type Inspection } from '../data/inspections'
+import { useMemo, useState } from 'react'
+import { type MasterUnit } from '../data/masterUnits'
+import { type Purchase } from '../data/purchases'
+import { type Sale } from '../data/sales'
+import { type Inspection } from '../data/inspections'
+import { usePipelineData } from '../context/usePipelineData'
 import { formatRupiah, formatRupiahCompact } from '../data/sales'
 import { Pagination } from '../components/Pagination'
 
@@ -20,31 +21,32 @@ type Row = MasterUnit & {
   stage: Stage
 }
 
-/** Gabungkan unit master dengan riwayat pembelian, inspeksi & penjualan (match by key) */
-function buildRows(): Row[] {
-  return MASTER_UNITS.map((u) => {
-    const purchase = PURCHASES.find((p) => p.id === u.id)
-    const sale = SALES.find((s) => s.id === u.id)
-    const inspection = INSPECTIONS.find((ins) => ins.id === u.id)
-    return { ...u, plate: u.car.plate, stage: { purchase, inspection, sale } }
-  })
-}
-
-const ALL_ROWS = buildRows()
-
 export function MasterUnitPage() {
-  const [units] = useState<Row[]>(ALL_ROWS)
+  const { masterUnits, purchases, sales, inspections } = usePipelineData()
+
   const [query, setQuery] = useState('')
   const [filterBrand, setFilterBrand] = useState('Semua Brand')
   const [filterStatus, setFilterStatus] = useState('Semua Status')
   const [filterYear, setFilterYear] = useState('Semua Tahun')
   const [filterColor, setFilterColor] = useState('Semua Warna')
   const [page, setPage] = useState(1)
-  const [selected, setSelected] = useState<Row | null>(ALL_ROWS[0])
+  const [selected, setSelected] = useState<Row | null>(null)
+
+  const units: Row[] = useMemo(() => {
+    return masterUnits.map((u) => {
+      const purchase = purchases.find((p) => p.id === u.id)
+      const sale = sales.find((s) => s.id === u.id)
+      const inspection = inspections.find((ins) => ins.id === u.id)
+      return { ...u, plate: u.car.plate, stage: { purchase, inspection, sale } }
+    })
+  }, [masterUnits, purchases, sales, inspections])
 
   const brands = ['Semua Brand', ...Array.from(new Set(units.map((u) => u.brand)))]
   const years = ['Semua Tahun', ...Array.from(new Set(units.map((u) => u.year))).sort((a, b) => b - a).map(String)]
   const colors = ['Semua Warna', ...Array.from(new Set(units.map((u) => u.color)))]
+
+  // Default selected to first available row
+  const activeSelected = selected ?? units[0] ?? null
 
   const statusOf = (r: Row) => (r.available ? 'Tersedia' : r.stage.sale ? 'Terjual' : 'Tersedia')
 
@@ -154,7 +156,7 @@ export function MasterUnitPage() {
                     <tr
                       key={u.id}
                       onClick={() => setSelected(u)}
-                      className={`h-[64px] cursor-pointer border-b border-line last:border-0 transition ${selected?.id === u.id ? 'bg-primary/5' : 'hover:bg-slate-50'}`}
+                      className={`h-[64px] cursor-pointer border-b border-line last:border-0 transition ${activeSelected?.id === u.id ? 'bg-primary/5' : 'hover:bg-slate-50'}`}
                     >
                       <td className="px-4 text-[13px] text-slate-400">{start + i + 1}</td>
                       <td className="whitespace-nowrap px-4 font-mono text-[12.5px] text-slate-500">{u.chassis.slice(0, 10)}</td>
@@ -212,13 +214,13 @@ export function MasterUnitPage() {
         </div>
 
         {/* Detail panel terintegrasi */}
-        {selected && (
+        {activeSelected && (
           <div className="rounded-[12px] border border-line bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
             <div className="flex items-center gap-3">
-              <img src={selected.imageUrl} alt={selected.name} className="h-14 w-20 rounded-[8px] object-cover" />
+              <img src={activeSelected.imageUrl} alt={activeSelected.name} className="h-14 w-20 rounded-[8px] object-cover" />
               <div>
-                <p className="text-[14px] font-bold text-slate-900">{selected.name} {selected.year}</p>
-                <p className="text-[11px] text-slate-400">{selected.plate} · {selected.color} · {selected.transmission}</p>
+                <p className="text-[14px] font-bold text-slate-900">{activeSelected.name} {activeSelected.year}</p>
+                <p className="text-[11px] text-slate-400">{activeSelected.plate} · {activeSelected.color} · {activeSelected.transmission}</p>
               </div>
             </div>
 
@@ -226,16 +228,16 @@ export function MasterUnitPage() {
               <div className="flex justify-between">
                 <span className="text-slate-400">Harga Beli</span>
                 <span className="font-semibold text-slate-800">
-                  {formatRupiah(selected.stage.purchase ? selected.stage.purchase.price : selected.acquisitionPrice)}
+                  {formatRupiah(activeSelected.stage.purchase ? activeSelected.stage.purchase.price : activeSelected.acquisitionPrice)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Harga Jual</span>
-                <span className="font-semibold text-slate-800">{formatRupiah(selected.sellingPrice)}</span>
+                <span className="font-semibold text-slate-800">{formatRupiah(activeSelected.sellingPrice)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Kondisi</span>
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${conditionColor(selected.condition)}`}>{selected.condition}</span>
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${conditionColor(activeSelected.condition)}`}>{activeSelected.condition}</span>
               </div>
             </div>
 
@@ -244,23 +246,23 @@ export function MasterUnitPage() {
               <div className="space-y-2">
                 <div className="flex justify-between gap-3">
                   <span className="text-slate-400">Status Mobil</span>
-                  <span className="font-medium text-slate-800 text-right">{selected.statusMobilTerakhir}</span>
+                  <span className="font-medium text-slate-800 text-right">{activeSelected.statusMobilTerakhir}</span>
                 </div>
                 <div className="flex justify-between gap-3">
                   <span className="text-slate-400">Tanggal Status</span>
-                  <span className="font-mono text-slate-600 text-right">{selected.tanggalStatusTerakhir}</span>
+                  <span className="font-mono text-slate-600 text-right">{activeSelected.tanggalStatusTerakhir}</span>
                 </div>
                 <div className="flex justify-between gap-3">
                   <span className="text-slate-400">No. HP Customer</span>
-                  <span className="font-mono text-slate-600 text-right">{selected.noHPCustomer}</span>
+                  <span className="font-mono text-slate-600 text-right">{activeSelected.noHPCustomer}</span>
                 </div>
                 <div className="flex justify-between gap-3">
                   <span className="text-slate-400">Sumber</span>
-                  <span className="text-slate-600 text-right">{selected.sumber}</span>
+                  <span className="text-slate-600 text-right">{activeSelected.sumber}</span>
                 </div>
                 <div className="rounded-[6px] bg-slate-50 p-2.5 text-[11px] text-slate-500">
                   <p className="mb-1 font-semibold text-slate-400">INFORMASI STATUS TERAKHIR</p>
-                  {selected.informasiStatusTerakhir}
+                  {activeSelected.informasiStatusTerakhir}
                 </div>
               </div>
             </div>
@@ -268,9 +270,9 @@ export function MasterUnitPage() {
             <div className="mt-4 border-t border-line pt-4">
               <p className="mb-2 text-[12px] font-semibold text-slate-500">Jejak Status</p>
               <div className="space-y-2">
-                <Jejak label="Pembelian" ok={!!selected.stage.purchase} detail={selected.stage.purchase ? `${selected.stage.purchase.invoice} · ${selected.stage.purchase.supplier}` : 'Belum tercatat'} />
-                <Jejak label="Inspeksi" ok={!!selected.stage.inspection} detail={selected.stage.inspection ? `${selected.stage.inspection.code} · ${selected.stage.inspection.status}` : 'Belum diinspeksi'} />
-                <Jejak label="Penjualan" ok={!!selected.stage.sale} detail={selected.stage.sale ? `${selected.stage.sale.invoice} · ${selected.stage.sale.customer}` : 'Belum terjual'} />
+                <Jejak label="Pembelian" ok={!!activeSelected.stage.purchase} detail={activeSelected.stage.purchase ? `${activeSelected.stage.purchase.invoice} · ${activeSelected.stage.purchase.supplier}` : 'Belum tercatat'} />
+                <Jejak label="Inspeksi" ok={!!activeSelected.stage.inspection} detail={activeSelected.stage.inspection ? `${activeSelected.stage.inspection.code} · ${activeSelected.stage.inspection.status}` : 'Belum diinspeksi'} />
+                <Jejak label="Penjualan" ok={!!activeSelected.stage.sale} detail={activeSelected.stage.sale ? `${activeSelected.stage.sale.invoice} · ${activeSelected.stage.sale.customer}` : 'Belum terjual'} />
               </div>
             </div>
 
