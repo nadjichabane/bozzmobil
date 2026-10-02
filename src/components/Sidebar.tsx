@@ -2,6 +2,7 @@ import {
   CarFront,
   ClipboardCheck,
   ClipboardPlus,
+  GanttChartSquare,
   LayoutDashboard,
   LogOut,
   Package,
@@ -23,6 +24,7 @@ export type NavId =
   | 'transaksi'
   | 'inspeksi'
   | 'leads'
+  | 'simulasi'
   | 'absensi'
   | 'gudang'
   | 'komparasi'
@@ -58,6 +60,7 @@ const SECTIONS: NavSection[] = [
     items: [
       { id: 'inspeksi', label: 'Inspeksi & Hasil', icon: ClipboardCheck },
       { id: 'leads', label: 'Leads Inspeksi', icon: ClipboardPlus },
+      { id: 'simulasi', label: 'Simulasi Pipeline', icon: GanttChartSquare },
     ],
   },
   {

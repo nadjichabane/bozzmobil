@@ -14,6 +14,8 @@ import { LaporanKeuanganPage } from './pages/LaporanKeuanganPage'
 import { UserPage } from './pages/UserPage'
 import { HrPage } from './pages/HrPage'
 import { MigrasiPage } from './pages/MigrasiPage'
+import { PipelineSimulatorPage } from './pages/PipelineSimulatorPage'
+import { PipelineProvider } from './context/PipelineContext'
 
 const PAGE_COPY: Record<NavId, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard & Reporting', subtitle: 'Ringkasan operasional, transaksi, inventaris, dan absensi' },
@@ -22,6 +24,7 @@ const PAGE_COPY: Record<NavId, { title: string; subtitle: string }> = {
   transaksi: { title: 'Pembelian & Penjualan', subtitle: 'Transaksi, relasi transaksi, harga & margin' },
   inspeksi: { title: 'Inspeksi & Leads', subtitle: 'Item cek fisik, temuan, catatan, rekomendasi keputusan' },
   leads: { title: 'Leads Inspeksi', subtitle: 'Daftar mobil yang akan diinspeksi & masuk antrian tim inspeksi' },
+  simulasi: { title: 'Simulasi Pipeline', subtitle: 'Ikuti alur Lead → Inspeksi → Pembelian → Stok → Penjualan' },
   absensi: { title: 'Absensi Karyawan', subtitle: 'Kehadiran, waktu masuk/keluar, rekap monitoring' },
   gudang: { title: 'Gudang / Inventory Barang', subtitle: 'Stok, barang masuk & keluar, histori, ketersediaan' },
   komparasi: { title: 'Komparasi Harga', subtitle: 'Bandingkan harga antar sumber & vendor sebelum pembelian' },
@@ -44,6 +47,7 @@ export default function App() {
     transaksi: <TransaksiPage />,
     inspeksi: <InspectionPage onNavigate={setActive} />,
     leads: <LeadsPage onNavigate={setActive} />,
+    simulasi: <PipelineSimulatorPage />,
     absensi: <AbsensiPage />,
     gudang: <GudangPage />,
     komparasi: <KomparasiPage />,
@@ -54,27 +58,29 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-page">
-      <Sidebar
-        active={active}
-        onSelect={setActive}
-        open={mobileOpen}
-        desktopHidden={desktopHidden}
-        onClose={() => setMobileOpen(false)}
-      />
-      <div className={desktopHidden ? '' : 'lg:pl-[215px]'}>
-        <Header
-          title={copy.title}
-          subtitle={copy.subtitle}
-          onMenu={() => {
-            if (window.innerWidth >= 1024) setDesktopHidden((v) => !v)
-            else setMobileOpen((v) => !v)
-          }}
+    <PipelineProvider>
+      <div className="min-h-screen bg-page">
+        <Sidebar
+          active={active}
+          onSelect={setActive}
+          open={mobileOpen}
+          desktopHidden={desktopHidden}
+          onClose={() => setMobileOpen(false)}
         />
-        <div className="px-4 py-5 lg:px-6">
-          {pages[active]}
+        <div className={desktopHidden ? '' : 'lg:pl-[215px]'}>
+          <Header
+            title={copy.title}
+            subtitle={copy.subtitle}
+            onMenu={() => {
+              if (window.innerWidth >= 1024) setDesktopHidden((v) => !v)
+              else setMobileOpen((v) => !v)
+            }}
+          />
+          <div className="px-4 py-5 lg:px-6">
+            {pages[active]}
+          </div>
         </div>
       </div>
-    </div>
+    </PipelineProvider>
   )
 }

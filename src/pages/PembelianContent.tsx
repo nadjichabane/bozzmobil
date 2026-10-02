@@ -64,7 +64,7 @@ export function PembelianPageContent() {
           <table className="w-full min-w-[850px] border-collapse text-left">
             <thead>
               <tr className="border-b border-line">
-                {['No. Invoice', 'Tanggal', 'Unit', 'Nopol', 'Supplier', 'Harga Beli', 'Biaya Admin', 'Metode Bayar', 'Status'].map((h) => (
+                {['No. Invoice', 'Tanggal', 'Unit', 'Nopol', 'Supplier', 'Jenis Transaksi', 'Harga Beli', 'Biaya Admin', 'Metode Bayar', 'Status'].map((h) => (
                   <th key={h} className="whitespace-nowrap px-4 py-3 text-[11.5px] font-semibold text-slate-500">{h}</th>
                 ))}
               </tr>
@@ -77,6 +77,7 @@ export function PembelianPageContent() {
                   <td className="px-4"><span className="text-[13px] font-medium text-slate-900">{p.unit}</span></td>
                   <td className="whitespace-nowrap px-4 text-[13px] font-mono text-slate-500">{p.plate}</td>
                   <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">{p.supplier}</td>
+                  <td className="whitespace-nowrap px-4 text-[12px] text-slate-500">{p.jenisTransaksi}</td>
                   <td className="whitespace-nowrap px-4 text-[13px] font-semibold text-slate-800">{formatRupiah(p.price)}</td>
                   <td className="whitespace-nowrap px-4 text-[13px] text-slate-500">{formatRupiah(p.adminFee)}</td>
                   <td className="whitespace-nowrap px-4"><span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${p.paymentMethod === 'Transfer' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>{p.paymentMethod}</span></td>

@@ -79,6 +79,7 @@ export function SalesTable({
                 'Unit',
                 'Customer',
                 'Jenis Bayar',
+                'Jenis Transaksi',
                 'Finance',
                 'Harga Jual',
                 'Laba Kotor',
@@ -105,6 +106,7 @@ export function SalesTable({
                   <button type="button" className="text-[13px] font-medium text-primary hover:underline">
                     {sale.invoice}
                   </button>
+                  <p className="text-[10.5px] font-mono text-slate-400">{sale.idTransaksi}</p>
                 </td>
                 <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">
                   {sale.date}
@@ -140,6 +142,9 @@ export function SalesTable({
                 <td className="px-4">
                   <PaymentBadge type={sale.payment} />
                 </td>
+                <td className="whitespace-nowrap px-4 text-[12px] text-slate-500">
+                  {sale.jenisTransaksi}
+                </td>
                 <td className="whitespace-nowrap px-4 text-[13px] text-slate-600">
                   {sale.finance}
                 </td>
@@ -162,7 +167,7 @@ export function SalesTable({
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-5 py-16 text-center text-[13px] text-slate-400">
+                <td colSpan={12} className="px-5 py-16 text-center text-[13px] text-slate-400">
                   Tidak ada data penjualan yang sesuai filter.
                 </td>
               </tr>
