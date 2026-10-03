@@ -14,6 +14,7 @@ export type Purchase = {
   jenisTransaksi: 'Pembelian Unit' | 'Pembelian Sparepart' | 'Pembelian Jasa'
   image: string
   car: PipelineCar
+  schemaUnit: PipelineCar['schemaUnit']
 }
 
 const SUPPLIERS = [
@@ -38,4 +39,5 @@ export const PURCHASES: Purchase[] = PURCHASE_CARS.map((c, i) => ({
   jenisTransaksi: i % 3 === 0 ? 'Pembelian Unit' : i % 3 === 1 ? 'Pembelian Unit' : 'Pembelian Jasa',
   image: c.image,
   car: c,
+  schemaUnit: c.schemaUnit,
 }))

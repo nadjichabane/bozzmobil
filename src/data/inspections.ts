@@ -43,6 +43,7 @@ export type Inspection = {
   reason: string
   documentNote: string
   car: PipelineCar
+  schemaUnit: PipelineCar['schemaUnit']
 }
 
 const CATEGORIES: InspectionCategory[] = [
@@ -117,6 +118,7 @@ export const INSPECTIONS: Inspection[] = INSPECTION_CARS.map((c, i) => ({
           : '',
   documentNote: 'Maks. 10 file (foto/video/pdf), ukuran maks. 10 MB per file.',
   car: c,
+  schemaUnit: c.schemaUnit,
 }))
 
 export function countBySeverity(findings: Finding[]) {

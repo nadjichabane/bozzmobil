@@ -76,6 +76,7 @@ function deriveLeads(cars: PipelineCar[]): Lead[] {
     source: LEAD_SOURCES.find((s) => s === c.source) ?? 'Lainnya',
     expectedPrice: c.expectedPrice,
     createdAt: `0${(i % 28) + 1}/09/2026`,
+    schemaUnit: c.schemaUnit,
   }))
 }
 
@@ -122,6 +123,7 @@ function deriveInspections(cars: PipelineCar[]): Inspection[] {
             : '',
         documentNote: 'Maks. 10 file (foto/video/pdf), ukuran maks. 10 MB per file.',
         car: c,
+        schemaUnit: c.schemaUnit,
       }
     })
 }
@@ -142,6 +144,7 @@ function derivePurchases(cars: PipelineCar[]): Purchase[] {
     jenisTransaksi: 'Pembelian Unit',
     image: c.image,
     car: c,
+    schemaUnit: c.schemaUnit,
   }))
 }
 
@@ -167,6 +170,7 @@ function deriveSales(cars: PipelineCar[]): Sale[] {
       image: c.image,
       salesPerson: SALES_PEOPLE[i % SALES_PEOPLE.length] ?? '-',
       car: c,
+      schemaUnit: c.schemaUnit,
     }))
 }
 
@@ -198,6 +202,7 @@ function deriveMasterUnits(cars: PipelineCar[]): MasterUnit[] {
         noHPCustomer: c.phone,
         sumber: c.source,
         car: c,
+        schemaUnit: c.schemaUnit,
       }
     })
 }
@@ -243,6 +248,7 @@ export function newPipelineCar(input: {
   source: string
   expectedPrice?: number
   note?: string
+  schemaUnit: PipelineCar['schemaUnit']
 }): Omit<PipelineCar, 'key'> {
   // Parse "Honda City" → brand="Honda", model="City"
   const [brand = '', model = ''] = input.carType.split(' ')
@@ -263,5 +269,6 @@ export function newPipelineCar(input: {
     color: 'Hitam',
     transmission: 'Otomatis',
     stage: 'lead',
+    schemaUnit: input.schemaUnit,
   }
 }

@@ -33,6 +33,7 @@ export type MasterUnit = {
   noHPCustomer: string
   sumber: string
   car: PipelineCar
+  schemaUnit: PipelineCar['schemaUnit']
 }
 
 export function statusForStage(stage: Stage): {
@@ -89,5 +90,6 @@ export const MASTER_UNITS: MasterUnit[] = UNIT_CARS.map((c, i) => {
     noHPCustomer: c.phone,
     sumber: c.source,
     car: c,
+    schemaUnit: c.schemaUnit,
   }
 })

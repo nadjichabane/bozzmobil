@@ -1,4 +1,4 @@
-import { PIPELINE, type Stage } from './pipeline'
+import { PIPELINE, type Stage, type SchemaUnit } from './pipeline'
 
 export type LeadStatus =
   | 'Baru'
@@ -32,6 +32,7 @@ export type Lead = {
   expectedPrice: number
   note?: string
   createdAt: string
+  schemaUnit: SchemaUnit
 }
 
 const stageToStatus: Record<Stage, LeadStatus> = {
@@ -72,6 +73,7 @@ export const LEADS: Lead[] = PIPELINE.map((c, i) => ({
   source: toLeadSource(c.source),
   expectedPrice: c.expectedPrice,
   createdAt: dayFor(i),
+  schemaUnit: c.schemaUnit,
 }))
 
 export const LEAD_SOURCES: LeadSource[] = SOURCE_SET

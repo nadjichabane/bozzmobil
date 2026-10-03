@@ -8,7 +8,7 @@ import {
   type LeadStatus,
 } from '../data/leads'
 import { usePipelineData, newPipelineCar } from '../context/usePipelineData'
-import { type PipelineCar } from '../data/pipeline'
+import { type PipelineCar, type SchemaUnit, SCHEMA_UNITS } from '../data/pipeline'
 import { type Purchase } from '../data/purchases'
 import { type Inspection } from '../data/inspections'
 import { formatRupiah } from '../data/sales'
@@ -34,6 +34,7 @@ const emptyForm: LeadForm = {
   source: 'Iklan Online',
   expectedPrice: undefined,
   note: '',
+  schemaUnit: 'REGULER',
 }
 
 const statusColor = (s: Lead['status']) => {
@@ -118,6 +119,7 @@ export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       source: form.source,
       expectedPrice: form.expectedPrice ?? undefined,
       note: form.note,
+      schemaUnit: form.schemaUnit,
     })
     const key = `new-${Date.now()}`
     addCar({ ...car, key })
@@ -135,6 +137,7 @@ export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       source: form.source,
       expectedPrice: form.expectedPrice ?? 0,
       createdAt: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+      schemaUnit: form.schemaUnit,
     })
     setShowForm(false)
     setForm(emptyForm)
@@ -304,6 +307,7 @@ export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               <DetailRow label="Alamat" value={selected.address} />
               <DetailRow label="Mobil" value={`${selected.carType} ${selected.year}${selected.mileage ? ` · ${selected.mileage.toLocaleString('id-ID')} km` : ''}`} />
               <DetailRow label="Nopol" value={selected.plate} mono />
+              <DetailRow label="Schema Unit" value={selected.schemaUnit} />
               <DetailRow label="Sumber" value={selected.source} />
               {selected.expectedPrice != null && <DetailRow label="Estimasi Harga" value={formatRupiah(selected.expectedPrice)} />}
             </div>
@@ -407,6 +411,11 @@ export function LeadsPage({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               </Field>
               <Field label="Estimasi Harga">
                 <input type="number" value={form.expectedPrice ?? ''} onChange={(e) => set('expectedPrice', e.target.value ? Number(e.target.value) : undefined)} className={input} placeholder="opsional" />
+              </Field>
+              <Field label="Schema Unit">
+                <select value={form.schemaUnit} onChange={(e) => set('schemaUnit', e.target.value as SchemaUnit)} className={input}>
+                  {SCHEMA_UNITS.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
               </Field>
               <Field label="Status Awal">
                 <select value={form.status} onChange={(e) => set('status', e.target.value as LeadStatus)} className={input}>

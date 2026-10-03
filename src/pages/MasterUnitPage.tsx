@@ -220,7 +220,7 @@ export function MasterUnitPage() {
               <img src={activeSelected.imageUrl} alt={activeSelected.name} className="h-14 w-20 rounded-[8px] object-cover" />
               <div>
                 <p className="text-[14px] font-bold text-slate-900">{activeSelected.name} {activeSelected.year}</p>
-                <p className="text-[11px] text-slate-400">{activeSelected.plate} · {activeSelected.color} · {activeSelected.transmission}</p>
+                <p className="text-[11px] text-slate-400">{activeSelected.plate} · {activeSelected.color} · {activeSelected.transmission} · <span className="font-medium text-slate-500">{activeSelected.schemaUnit}</span></p>
               </div>
             </div>
 
@@ -238,6 +238,10 @@ export function MasterUnitPage() {
               <div className="flex justify-between">
                 <span className="text-slate-400">Kondisi</span>
                 <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${conditionColor(activeSelected.condition)}`}>{activeSelected.condition}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Schema Unit</span>
+                <span className="font-semibold text-slate-800">{activeSelected.schemaUnit}</span>
               </div>
             </div>
 

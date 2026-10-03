@@ -22,6 +22,7 @@ export type Sale = {
   image: string
   salesPerson: string
   car: PipelineCar
+  schemaUnit: PipelineCar['schemaUnit']
 }
 
 const SALES_PERSONS: string[] = ['Rudi Hartono', 'Maya Putri', 'Andi Saputra']
@@ -48,6 +49,7 @@ export const SALES: Sale[] = SOLD_CARS.map((c, i) => ({
   image: c.image,
   salesPerson: SALES_PERSONS[i % SALES_PERSONS.length],
   car: c,
+  schemaUnit: c.schemaUnit,
 }))
 
 export const formatRupiah = (value: number) =>

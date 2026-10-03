@@ -53,6 +53,7 @@ export function AddSaleModal({ open, onClose, onSubmit }: AddSaleModalProps) {
       image: '/cars/serena.jpg',
       salesPerson: 'Rudi Hartono',
       car: makePipelineCar({ key: `manual-${crypto.randomUUID().slice(0, 8)}`, plate: plate || 'B 0000 XXX' }),
+      schemaUnit: 'REGULER',
     })
     onClose()
     setPlate('')
