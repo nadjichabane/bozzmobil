@@ -16,6 +16,7 @@ export function PembelianPageContent() {
   const { purchases, advance } = usePipelineData()
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const filtered = purchases.filter((p) => {
     if (!query) return true
@@ -43,6 +44,12 @@ export function PembelianPageContent() {
           <Plus className="h-4 w-4" /> Tambah Pembelian
         </button>
       </div>
+
+      {notice && (
+        <div className="mb-4 rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
+          {notice}
+        </div>
+      )}
 
       <div className="mb-4 flex items-center gap-2">
         <div className="relative">
@@ -86,10 +93,17 @@ export function PembelianPageContent() {
                     {p.status === 'Diproses' && p.car.stage === 'purchasing' && (
                       <button
                         type="button"
-                        onClick={() => advance(p.id, 'available')}
+                        onClick={() => {
+                          const ok = advance(p.id, 'qc')
+                          setNotice(
+                            ok
+                              ? `${p.invoice} — pembelian selesai, unit masuk stok NOT READY & proses QC.`
+                              : `Transisi ke QC tidak valid untuk ${p.invoice}.`,
+                          )
+                        }}
                         className="rounded-[6px] bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600"
                       >
-                        Selesaikan
+                        Selesaikan → QC
                       </button>
                     )}
                   </td>

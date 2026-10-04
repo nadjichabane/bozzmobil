@@ -1,4 +1,4 @@
-import { Eye, Plus, Search } from 'lucide-react'
+import { CheckCircle2, Eye, FileCheck, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { type MasterUnit } from '../data/masterUnits'
 import { type Purchase } from '../data/purchases'
@@ -22,9 +22,10 @@ type Row = MasterUnit & {
 }
 
 export function MasterUnitPage() {
-  const { masterUnits, purchases, sales, inspections } = usePipelineData()
+  const { masterUnits, purchases, sales, inspections, advance, markBast } = usePipelineData()
 
   const [query, setQuery] = useState('')
+  const [notice, setNotice] = useState<string | null>(null)
   const [filterBrand, setFilterBrand] = useState('Semua Brand')
   const [filterStatus, setFilterStatus] = useState('Semua Status')
   const [filterYear, setFilterYear] = useState('Semua Tahun')
@@ -48,7 +49,14 @@ export function MasterUnitPage() {
   // Default selected to first available row
   const activeSelected = selected ?? units[0] ?? null
 
-  const statusOf = (r: Row) => (r.available ? 'Tersedia' : r.stage.sale ? 'Terjual' : 'Tersedia')
+  const statusOf = (r: Row) =>
+    r.car.stage === 'qc'
+      ? 'NOT READY — QC'
+      : r.available
+        ? 'READY — Tersedia'
+        : r.stage.sale
+          ? r.bastCompleted ? 'Terjual — BAST' : 'Terjual'
+          : 'Tersedia'
 
   const filtered = units.filter((u) => {
     if (filterBrand !== 'Semua Brand' && u.brand !== filterBrand) return false
@@ -65,9 +73,9 @@ export function MasterUnitPage() {
     )
   })
 
+  const totalQc = units.filter((u) => u.car.stage === 'qc').length
   const totalAvailable = units.filter((u) => u.available).length
   const totalSold = units.filter((u) => !u.available && u.stage.sale).length
-  const onInspection = units.filter((u) => u.stage.inspection).length
   const totalMargin = units.reduce((s, u) => s + (u.sellingPrice - u.acquisitionPrice), 0)
   const avgMarginPct = totalMargin / units.reduce((s, u) => s + u.acquisitionPrice, 0)
 
@@ -78,9 +86,9 @@ export function MasterUnitPage() {
 
   const kpiCards = [
     { label: 'TOTAL UNIT', value: String(units.length), sub: 'unit terdaftar' },
-    { label: 'TERSEDIA', value: String(totalAvailable), sub: 'unit siap jual' },
+    { label: 'NOT READY (QC)', value: String(totalQc), sub: 'proses QC berjalan' },
+    { label: 'READY', value: String(totalAvailable), sub: 'unit siap jual' },
     { label: 'TERJUAL', value: String(totalSold), sub: 'sudah terjual' },
-    { label: 'DALSIN INSPEKSI', value: String(onInspection), sub: 'unit sedang dicek' },
     { label: 'MARGIN RATA-RATA', value: formatRupiahCompact(totalMargin / units.length), sub: `${avgMarginPct.toFixed(1)}% dari harga beli`, accent: true },
   ]
 
@@ -112,6 +120,12 @@ export function MasterUnitPage() {
         ))}
       </div>
 
+      {notice && (
+        <div className="mb-4 rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-800">
+          {notice}
+        </div>
+      )}
+
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -126,7 +140,7 @@ export function MasterUnitPage() {
           {brands.map((b) => <option key={b}>{b}</option>)}
         </select>
         <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1) }} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
-          {['Semua Status', 'Tersedia', 'Terjual'].map((s) => <option key={s}>{s}</option>)}
+          {['Semua Status', 'NOT READY — QC', 'READY — Tersedia', 'Terjual', 'Terjual — BAST'].map((s) => <option key={s}>{s}</option>)}
         </select>
         <select value={filterYear} onChange={(e) => { setFilterYear(e.target.value); setPage(1) }} className="h-[38px] rounded-[8px] border border-line bg-white px-3 text-[13px] text-slate-700">
           {years.map((y) => <option key={y}>{y}</option>)}
@@ -179,7 +193,7 @@ export function MasterUnitPage() {
                       </td>
                       <td className="px-4">
                         <div className="flex flex-col gap-1">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${st === 'Tersedia' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{st}</span>
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${st === 'NOT READY — QC' ? 'bg-amber-50 text-amber-700' : st === 'READY — Tersedia' ? 'bg-emerald-50 text-emerald-700' : st === 'Terjual' ? 'bg-slate-100 text-slate-600' : 'bg-emerald-50 text-emerald-700'}`}>{st}</span>
                           {u.stage.inspection && (
                             <span className="inline-flex w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
                               Inspeksi: {u.stage.inspection.status}
@@ -188,6 +202,16 @@ export function MasterUnitPage() {
                           {u.stage.sale && (
                             <span className="inline-flex w-fit rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
                               Jual: {u.stage.sale.status}
+                            </span>
+                          )}
+                          {u.stage.sale && !u.bastCompleted && (
+                            <span className="inline-flex w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                              BAST: belum
+                            </span>
+                          )}
+                          {u.stage.sale && u.bastCompleted && (
+                            <span className="inline-flex w-fit rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                              BAST: selesai
                             </span>
                           )}
                         </div>
@@ -277,9 +301,47 @@ export function MasterUnitPage() {
                 <Jejak label="Pembelian" ok={!!activeSelected.stage.purchase} detail={activeSelected.stage.purchase ? `${activeSelected.stage.purchase.invoice} · ${activeSelected.stage.purchase.supplier}` : 'Belum tercatat'} />
                 <Jejak label="Inspeksi" ok={!!activeSelected.stage.inspection} detail={activeSelected.stage.inspection ? `${activeSelected.stage.inspection.code} · ${activeSelected.stage.inspection.status}` : 'Belum diinspeksi'} />
                 <Jejak label="Penjualan" ok={!!activeSelected.stage.sale} detail={activeSelected.stage.sale ? `${activeSelected.stage.sale.invoice} · ${activeSelected.stage.sale.customer}` : 'Belum terjual'} />
+                <Jejak label="BAST" ok={activeSelected.bastCompleted} detail={activeSelected.bastCompleted ? 'BAST ditandatangani' : activeSelected.stage.sale ? 'Menunggu BAST' : 'Belum terjual'} />
               </div>
             </div>
 
+            {activeSelected.car.stage === 'qc' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const ok = advance(activeSelected.id, 'available')
+                  setNotice(
+                    ok
+                      ? `${activeSelected.name} ${activeSelected.year} — QC selesai, unit sekarang READY.`
+                      : `Transisi QC → READY tidak valid untuk ${activeSelected.name}.`,
+                  )
+                }}
+                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-[8px] bg-emerald-500 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-emerald-600"
+              >
+                <CheckCircle2 className="h-4 w-4" /> QC Selesai — Tandai READY
+              </button>
+            )}
+            {activeSelected.car.stage === 'sold' && !activeSelected.bastCompleted && (
+              <button
+                type="button"
+                onClick={() => {
+                  const ok = markBast(activeSelected.id)
+                  setNotice(
+                    ok
+                      ? `${activeSelected.name} ${activeSelected.year} — BAST ditandatangani.`
+                      : `BAST tidak dapat diproses untuk ${activeSelected.name}.`,
+                  )
+                }}
+                className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-[8px] bg-indigo-500 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-indigo-600"
+              >
+                <FileCheck className="h-4 w-4" /> Tandatangani BAST
+              </button>
+            )}
+            {activeSelected.car.stage === 'sold' && activeSelected.bastCompleted && (
+              <div className="mt-4 flex items-center justify-center gap-1.5 rounded-[8px] bg-emerald-50 px-4 py-2.5 text-[13px] font-semibold text-emerald-700">
+                <CheckCircle2 className="h-4 w-4" /> BAST Selesai
+              </div>
+            )}
             <button type="button" className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-[8px] border border-line bg-white px-4 py-2.5 text-[13px] font-medium text-slate-700 hover:bg-slate-50">
               <Eye className="h-4 w-4" /> Detail Lengkap
             </button>

@@ -72,6 +72,7 @@ const FINDINGS_BY_STAGE: Record<Stage, Finding[]> = {
     { id: 'f1', severity: 'Minor', title: 'Cat Kusam', description: 'Permukaan cat kusam, dapat dipoles.', system: 'Eksterior', area: 'Body', photoCount: 1, photos: [] },
     { id: 'f2', severity: 'Catatan', title: 'Km Tinggi', description: 'Kilometer tinggi, kondisi masih baik.', system: 'Data Unit', area: 'Odometer', photoCount: 0, photos: [] },
   ],
+  qc: [],
   available: [],
   sold: [],
 }
@@ -81,6 +82,7 @@ const stageToInspectionStatus: Record<Stage, Inspection['status']> = {
   inspecting: 'Dalam Inspeksi',
   rejected: 'Selesai',
   purchasing: 'Selesai',
+  qc: 'Selesai',
   available: 'Selesai',
   sold: 'Selesai',
 }

@@ -1,7 +1,8 @@
 import { X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { type PaymentType, type Sale, type SaleStatus } from '../data/sales'
-import { makePipelineCar } from '../data/pipeline'
+import { usePipelineData } from '../context/usePipelineData'
+import { usePipeline } from '../context/PipelineContext'
 
 type AddSaleModalProps = {
   open: boolean
@@ -9,17 +10,17 @@ type AddSaleModalProps = {
   onSubmit: (sale: Sale) => void
 }
 
-const UNITS = [
-  'Honda City E MT 2012',
-  'Toyota Raize GR 2022',
-  'Mitsubishi Xpander 2021',
-  'Toyota Fortuner VRZ 2020',
-  'Honda CR-V 2.4 2015',
-]
-
 export function AddSaleModal({ open, onClose, onSubmit }: AddSaleModalProps) {
-  const [unit, setUnit] = useState(UNITS[0])
-  const [plate, setPlate] = useState('')
+  const { masterUnits } = usePipelineData()
+  const { advance } = usePipeline()
+  const readyUnits = masterUnits.filter((u) => u.available)
+  const [unitKey, setUnitKey] = useState('')
+  // Pilihan tampilan = sumber kebenaran: bila unitKey belum valid (modal baru dibuka
+  // atau unit yang tadinya dipilih sudah terjual), pakai unit pertama yang READY.
+  const effectiveKey = readyUnits.some((u) => u.id === unitKey)
+    ? unitKey
+    : readyUnits[0]?.id ?? ''
+  const unitRef = readyUnits.find((u) => u.id === effectiveKey)
   const [customer, setCustomer] = useState('')
   const [phone, setPhone] = useState('')
   const [payment, setPayment] = useState<PaymentType>('Cash')
@@ -32,31 +33,34 @@ export function AddSaleModal({ open, onClose, onSubmit }: AddSaleModalProps) {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
+    if (!unitRef) return
+    advance(unitRef.id, 'sold')
     const now = new Date()
     const invoice = `INV-2026-${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${now.getHours()}${now.getMinutes()}`
     onSubmit({
-      id: crypto.randomUUID(),
+      id: unitRef.id,
       invoice,
       idTransaksi: `TRX-2026-${String(Math.floor(Math.random() * 900) + 100)}`,
       date: now.toLocaleDateString('id-ID'),
-      unit,
-      plate: plate || 'B 0000 XXX',
+      unit: `${unitRef.name} ${unitRef.year}`,
+      plate: unitRef.car.plate,
       customer: customer || 'Customer Baru',
       phone: phone || '0812-0000-0000',
       payment,
       finance: payment === 'Cash' ? '-' : finance,
-      price: Number(price) || 0,
-      profit: Number(profit) || 0,
+      price: Number(price) || unitRef.sellingPrice,
+      profit: Number(profit) || unitRef.sellingPrice - unitRef.acquisitionPrice,
       status,
       completeness: status === 'Lunas' ? 100 : 70,
+      bastCompleted: false,
       jenisTransaksi: 'Penjualan Unit',
-      image: '/cars/serena.jpg',
+      image: unitRef.imageUrl,
       salesPerson: 'Rudi Hartono',
-      car: makePipelineCar({ key: `manual-${crypto.randomUUID().slice(0, 8)}`, plate: plate || 'B 0000 XXX' }),
-      schemaUnit: 'REGULER',
+      car: { ...unitRef.car, stage: 'sold' as const },
+      schemaUnit: unitRef.schemaUnit,
     })
     onClose()
-    setPlate('')
+    setUnitKey('')
     setCustomer('')
     setPhone('')
   }
@@ -86,24 +90,30 @@ export function AddSaleModal({ open, onClose, onSubmit }: AddSaleModalProps) {
         </div>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 px-5 py-4 sm:grid-cols-2">
           <label className="block text-[12px] font-medium text-slate-600">
-            Unit
+            Unit (hanya READY)
             <select
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-              className="mt-1 h-[38px] w-full rounded-[8px] border border-line px-3 text-[13px] text-slate-800"
+              value={effectiveKey}
+              onChange={(e) => setUnitKey(e.target.value)}
+              disabled={readyUnits.length === 0}
+              className="mt-1 h-[38px] w-full rounded-[8px] border border-line px-3 text-[13px] text-slate-800 disabled:bg-slate-50"
             >
-              {UNITS.map((u) => (
-                <option key={u}>{u}</option>
-              ))}
+              {readyUnits.length === 0 ? (
+                <option value="">Tidak ada unit READY</option>
+              ) : (
+                readyUnits.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} {u.year} · {u.car.plate}
+                  </option>
+                ))
+              )}
             </select>
           </label>
           <label className="block text-[12px] font-medium text-slate-600">
             Nopol
             <input
-              value={plate}
-              onChange={(e) => setPlate(e.target.value)}
-              placeholder="B 1234 ABC"
-              className="mt-1 h-[38px] w-full rounded-[8px] border border-line px-3 text-[13px]"
+              value={unitRef?.car.plate ?? ''}
+              disabled
+              className="mt-1 h-[38px] w-full rounded-[8px] border border-line px-3 text-[13px] disabled:bg-slate-50 disabled:text-slate-400"
             />
           </label>
           <label className="block text-[12px] font-medium text-slate-600">

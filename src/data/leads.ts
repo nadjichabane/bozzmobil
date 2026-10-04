@@ -40,6 +40,7 @@ const stageToStatus: Record<Stage, LeadStatus> = {
   inspecting: 'Dalam Inspeksi',
   rejected: 'Ditolak',
   purchasing: 'Lulus',
+  qc: 'Terbeli',
   available: 'Terbeli',
   sold: 'Terjual',
 }

@@ -4,6 +4,7 @@ export type StatusTerakhir =
   | 'Terbeli — menunggu inspeksi selesai'
   | 'Terbeli — dalam inspeksi'
   | 'Terbeli — inspeksi lulus, pembelian diproses'
+  | 'Stok — NOT READY, QC sedang berjalan'
   | 'Tersedia — siap dijual'
   | 'Terjual — lunas'
   | 'Terjual — proses STNK'
@@ -26,6 +27,8 @@ export type MasterUnit = {
   condition: 'Berkondisi Baik' | 'Butuh Perbaikan Ringan' | 'Butuh Perbaikan Besar'
   imageUrl: string
   available: boolean
+  // BAST / BUKTI TRANSAKSI selesai (hanya relevan setelah stage 'sold')
+  bastCompleted: boolean
   // ERD: MASTER UNIT — status terakhir
   statusMobilTerakhir: string
   informasiStatusTerakhir: string
@@ -47,6 +50,12 @@ export function statusForStage(stage: Stage): {
         label: 'Tersedia — pembelian diproses',
         info: 'Unit lulus inspeksi, pembelian sedang diproses oleh admin.',
         date: '01/10/2026',
+      }
+    case 'qc':
+      return {
+        label: 'Stok — NOT READY, QC sedang berjalan',
+        info: 'Pembelian selesai, unit masuk ke data stok; QC belum selesai, belum bisa dijual.',
+        date: '02/10/2026',
       }
     case 'available':
       return {
@@ -84,6 +93,7 @@ export const MASTER_UNITS: MasterUnit[] = UNIT_CARS.map((c, i) => {
     condition: c.sellPrice > c.buyPrice * 1.15 ? 'Berkondisi Baik' : 'Butuh Perbaikan Ringan',
     imageUrl: c.image,
     available: c.stage === 'available',
+    bastCompleted: c.bastCompleted,
     statusMobilTerakhir: st.label,
     informasiStatusTerakhir: st.info,
     tanggalStatusTerakhir: st.date,

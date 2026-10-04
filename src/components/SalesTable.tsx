@@ -14,6 +14,7 @@ type SalesTableProps = {
   to: number
   total: number
   onPageChange: (page: number) => void
+  onMarkBast: (unitKey: string) => void
 }
 
 function RowActions({ sale }: { sale: Sale }) {
@@ -66,6 +67,7 @@ export function SalesTable({
   to,
   total,
   onPageChange,
+  onMarkBast,
 }: SalesTableProps) {
   return (
     <div>
@@ -84,6 +86,7 @@ export function SalesTable({
                 'Harga Jual',
                 'Laba Kotor',
                 'Status',
+                'BAST',
                 'Kelengkapan',
                 'Aksi',
               ].map((h) => (
@@ -156,6 +159,20 @@ export function SalesTable({
                 </td>
                 <td className="px-4">
                   <StatusBadge status={sale.status} />
+                </td>
+                <td className="px-4">
+                  {sale.bastCompleted ? (
+                    <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Selesai</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onMarkBast(sale.id)}
+                      className="inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 hover:bg-amber-100"
+                      title="Tandatangani BAST"
+                    >
+                      Tandatangani
+                    </button>
+                  )}
                 </td>
                 <td className="px-4">
                   <ProgressBar value={sale.completeness} />

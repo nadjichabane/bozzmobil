@@ -3,8 +3,7 @@ import { SalesPage } from './SalesPage'
 import { PembelianPageContent } from './PembelianContent'
 import { PembelianForm } from '../components/PembelianForm'
 import { PenjualanForm } from '../components/PenjualanForm'
-import { usePipelineData } from '../context/usePipelineData'
-import { MASTER_UNITS } from '../data/masterUnits'
+import { usePipeline } from '../context/PipelineContext'
 
 type TabId = 'sales' | 'pembelian' | 'form-penjualan' | 'form-pembelian'
 
@@ -17,9 +16,17 @@ const TABS: { id: TabId; label: string }[] = [
 
 export function TransaksiPage() {
   const [tab, setTab] = useState<TabId>('sales')
-  const { advance, masterUnits: liveMasterUnits } = usePipelineData()
+  const { advance } = usePipeline()
 
-  const selectedUnitKey = liveMasterUnits[0]?.id ?? MASTER_UNITS[0]?.id
+  // Sale: unit yang dipilih user (key internal) diteruskan langsung ke action.
+  const handleSell = (unitKey: string) => {
+    advance(unitKey, 'sold')
+  }
+
+  // Purchase: unit yang dipilih user (key internal) diteruskan langsung ke action.
+  const handlePurchase = (unitKey: string) => {
+    advance(unitKey, 'qc')
+  }
 
   return (
     <div>
@@ -41,18 +48,10 @@ export function TransaksiPage() {
       {tab === 'sales' && <SalesPage />}
       {tab === 'pembelian' && <PembelianPageContent />}
       {tab === 'form-penjualan' && (
-        <PenjualanForm
-          onProcess={() => {
-            if (selectedUnitKey) advance(selectedUnitKey, 'sold')
-          }}
-        />
+        <PenjualanForm onProcess={handleSell} />
       )}
       {tab === 'form-pembelian' && (
-        <PembelianForm
-          onProcess={() => {
-            if (selectedUnitKey) advance(selectedUnitKey, 'available')
-          }}
-        />
+        <PembelianForm onProcess={handlePurchase} />
       )}
     </div>
   )

@@ -29,6 +29,7 @@ const stageToLeadStatus: Record<Stage, Lead['status']> = {
   inspecting: 'Dalam Inspeksi',
   rejected: 'Ditolak',
   purchasing: 'Lulus',
+  qc: 'Terbeli',
   available: 'Terbeli',
   sold: 'Terjual',
 }
@@ -38,12 +39,14 @@ const stageToInspectionStatus: Record<Stage, Inspection['status']> = {
   inspecting: 'Dalam Inspeksi',
   rejected: 'Selesai',
   purchasing: 'Selesai',
+  qc: 'Selesai',
   available: 'Selesai',
   sold: 'Selesai',
 }
 
 const FINDINGS: Record<Stage, Finding[]> = {
   lead: [],
+  qc: [],
   inspecting: [
     { id: 'f1', severity: 'Minor', title: 'Bumper Depan', description: 'Baret halus pada sisi kanan.', system: 'Eksterior', area: 'Bumper', photoCount: 2, photos: [] },
     { id: 'f2', severity: 'Catatan', title: 'Jok Pengemudi', description: 'Noda ringan, dapat dicuci.', system: 'Interior', area: 'Jok', photoCount: 1, photos: [] },
@@ -139,7 +142,7 @@ function derivePurchases(cars: PipelineCar[]): Purchase[] {
     supplier: SUPPLIER_NAMES[i % SUPPLIER_NAMES.length],
     price: c.buyPrice,
     adminFee: Math.round(c.buyPrice * 0.01),
-    status: c.stage === 'available' || c.stage === 'sold' ? 'Selesai' : 'Diproses',
+    status: c.stage === 'qc' || c.stage === 'available' || c.stage === 'sold' ? 'Selesai' : 'Diproses',
     paymentMethod: i % 2 === 0 ? 'Transfer' : 'Tunai',
     jenisTransaksi: 'Pembelian Unit',
     image: c.image,
@@ -166,6 +169,7 @@ function deriveSales(cars: PipelineCar[]): Sale[] {
       profit: Math.round(c.sellPrice - c.buyPrice),
       status: i % 3 === 0 ? 'Lunas' : i % 3 === 1 ? 'Proses STNK' : 'Proses BPKB',
       completeness: i % 3 === 0 ? 100 : i % 3 === 1 ? 80 : 60,
+      bastCompleted: c.bastCompleted,
       jenisTransaksi: i % 4 === 0 ? 'Trade In' : 'Penjualan Unit',
       image: c.image,
       salesPerson: SALES_PEOPLE[i % SALES_PEOPLE.length] ?? '-',
@@ -176,7 +180,7 @@ function deriveSales(cars: PipelineCar[]): Sale[] {
 
 function deriveMasterUnits(cars: PipelineCar[]): MasterUnit[] {
   return cars
-    .filter((c) => c.stage === 'available' || c.stage === 'sold')
+    .filter((c) => c.stage === 'qc' || c.stage === 'available' || c.stage === 'sold')
     .map((c, i) => {
       const st = statusForStage(c.stage)
       return {
@@ -196,6 +200,7 @@ function deriveMasterUnits(cars: PipelineCar[]): MasterUnit[] {
         condition: c.sellPrice > c.buyPrice * 1.15 ? 'Berkondisi Baik' : 'Butuh Perbaikan Ringan',
         imageUrl: c.image,
         available: c.stage === 'available',
+        bastCompleted: c.bastCompleted,
         statusMobilTerakhir: st.label,
         informasiStatusTerakhir: st.info,
         tanggalStatusTerakhir: st.date,
@@ -210,7 +215,7 @@ function deriveMasterUnits(cars: PipelineCar[]): MasterUnit[] {
 // ── The hook ────────────────────────────────────────────────────────────────
 
 export function usePipelineData() {
-  const { cars, advance, addCar, removeCar, reset, getCar } = usePipeline()
+  const { cars, advance, addCar, removeCar, reset, getCar, markBast } = usePipeline()
 
   return useMemo(() => {
     const leads = deriveLeads(cars)
@@ -231,8 +236,9 @@ export function usePipelineData() {
       removeCar,
       reset,
       getCar,
+      markBast,
     }
-  }, [cars, advance, addCar, removeCar, reset, getCar])
+  }, [cars, advance, addCar, removeCar, reset, getCar, markBast])
 }
 
 // ── Tambah car baru (form Leads) ────────────────────────────────────────────
@@ -270,5 +276,6 @@ export function newPipelineCar(input: {
     transmission: 'Otomatis',
     stage: 'lead',
     schemaUnit: input.schemaUnit,
+    bastCompleted: false,
   }
 }

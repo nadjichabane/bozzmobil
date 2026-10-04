@@ -1,26 +1,44 @@
 import { FileText, Search, UploadCloud } from 'lucide-react'
-import { useState } from 'react'
-import { MASTER_UNITS } from '../data/masterUnits'
+import { useMemo, useState } from 'react'
 import { SUPPLIERS } from '../data/suppliers'
 import { formatRupiah } from '../data/sales'
 import { inputCls, selectCls, Field, CheckRow } from './FormSection'
 import { TransactionStepper } from './TransactionStepper'
+import { usePipelineData } from '../context/usePipelineData'
 
 type PembelianFormProps = {
   onDraft?: () => void
-  onProcess?: () => void
+  /** Dipanggil dengan key internal unit yang dipilih user; parent meneruskan ke action purchase. */
+  onProcess?: (unitKey: string) => void
 }
 
-const UNITS = MASTER_UNITS.map((u) => ({
-  id: u.id,
-  label: `${u.name} ${u.year}`,
-  image: u.imageUrl,
-}))
+type UnitOption = {
+  id: string
+  label: string
+  image: string
+  plate: string
+}
 
 export function PembelianForm({ onDraft, onProcess }: PembelianFormProps) {
+  const { cars } = usePipelineData()
+
+  // Unit yang bisa diproses pembelian: stage 'purchasing' (lulus inspeksi, pembelian diproses).
+  const UNITS: UnitOption[] = useMemo(
+    () =>
+      cars
+        .filter((c) => c.stage === 'purchasing')
+        .map((c) => ({
+          id: c.key,
+          label: `${c.brand} ${c.model} ${c.year}`,
+          image: c.image,
+          plate: c.plate,
+        })),
+    [cars],
+  )
+
   const [step] = useState(0)
   const [isTradeIn, setIsTradeIn] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState(UNITS[0].id)
+  const [selectedUnit, setSelectedUnit] = useState('')
   const [selectedSupplier, setSelectedSupplier] = useState(SUPPLIERS[0].name)
   const [kelengkapan, setKelengkapan] = useState<Record<string, boolean>>({
     kunci: true,
@@ -30,7 +48,12 @@ export function PembelianForm({ onDraft, onProcess }: PembelianFormProps) {
     bukuService: false,
   })
 
-  const unit = UNITS.find((u) => u.id === selectedUnit) ?? UNITS[0]
+  const unit = UNITS.find((u) => u.id === selectedUnit) ?? UNITS[0] ?? {
+    id: '',
+    label: 'Tidak ada unit pembelian',
+    image: '',
+    plate: '',
+  }
 
   const kelengkapanItems = [
     { key: 'kunci', label: 'Kunci Serep' },
@@ -43,6 +66,10 @@ export function PembelianForm({ onDraft, onProcess }: PembelianFormProps) {
   const docs = ['Faktur Pembelian', 'Bukti Transfer', 'Dokumen STNK', 'Dokumen Lain']
   const [docUploaded, setDocUploaded] = useState<string[]>([])
 
+  const handleProcess = () => {
+    if (unit.id) onProcess?.(unit.id)
+  }
+
   return (
     <div className="px-4 py-5 lg:px-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -54,7 +81,7 @@ export function PembelianForm({ onDraft, onProcess }: PembelianFormProps) {
           <button type="button" onClick={onDraft} className="h-[38px] rounded-[8px] border border-line bg-white px-4 text-[13px] font-medium text-slate-600 hover:bg-slate-50">
             Simpan Draft
           </button>
-          <button type="button" onClick={onProcess} className="h-[38px] rounded-[8px] bg-primary px-4 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(13,110,253,0.35)] hover:bg-primary-hover">
+          <button type="button" onClick={handleProcess} disabled={!unit.id} className="h-[38px] rounded-[8px] bg-primary px-4 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(13,110,253,0.35)] hover:bg-primary-hover disabled:opacity-50">
             Simpan & Proses
           </button>
         </div>
@@ -111,16 +138,20 @@ export function PembelianForm({ onDraft, onProcess }: PembelianFormProps) {
             </div>
             <div className="flex flex-wrap items-center gap-4">
               <div className="w-[220px]">
-                <Field label="Pilih Unit">
-                  <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className={selectCls}>
-                    {UNITS.map((u) => <option key={u.id} value={u.id}>{u.label}</option>)}
+                <Field label="Pilih Unit (stage Pembelian)">
+                  <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} disabled={UNITS.length === 0} className={selectCls}>
+                    {UNITS.length === 0 ? (
+                      <option value="">Tidak ada unit di stage pembelian</option>
+                    ) : (
+                      UNITS.map((u) => <option key={u.id} value={u.id}>{u.label}</option>)
+                    )}
                   </select>
                 </Field>
               </div>
               <img src={unit.image} alt={unit.label} className="h-12 w-20 rounded-[8px] object-cover" />
               <div className="flex-1">
                 <p className="text-[13px] font-semibold text-slate-900">{unit.label}</p>
-                <p className="text-[12px] text-slate-500">Nopol B 1505 TAG</p>
+                <p className="text-[12px] text-slate-500">Nopol {unit.plate || '—'}</p>
               </div>
             </div>
           </div>
@@ -225,7 +256,7 @@ export function PembelianForm({ onDraft, onProcess }: PembelianFormProps) {
             <button type="button" onClick={onDraft} className="h-[38px] rounded-[8px] border border-line bg-white px-4 text-[13px] font-medium text-slate-600 hover:bg-slate-50">
               Simpan Draft
             </button>
-            <button type="button" onClick={onProcess} className="h-[38px] rounded-[8px] bg-primary px-4 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(13,110,253,0.35)] hover:bg-primary-hover">
+            <button type="button" onClick={handleProcess} disabled={!unit.id} className="h-[38px] rounded-[8px] bg-primary px-4 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(13,110,253,0.35)] hover:bg-primary-hover disabled:opacity-50">
               Simpan & Proses
             </button>
           </div>

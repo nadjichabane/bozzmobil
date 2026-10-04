@@ -34,7 +34,7 @@ export const PURCHASES: Purchase[] = PURCHASE_CARS.map((c, i) => ({
   supplier: SUPPLIERS[i % SUPPLIERS.length],
   price: c.buyPrice,
   adminFee: Math.round(c.buyPrice * 0.01),
-  status: c.stage === 'available' || c.stage === 'sold' ? 'Selesai' : 'Diproses',
+  status: c.stage === 'qc' || c.stage === 'available' || c.stage === 'sold' ? 'Selesai' : 'Diproses',
   paymentMethod: i % 2 === 0 ? 'Transfer' : 'Tunai',
   jenisTransaksi: i % 3 === 0 ? 'Pembelian Unit' : i % 3 === 1 ? 'Pembelian Unit' : 'Pembelian Jasa',
   image: c.image,

@@ -62,9 +62,18 @@ const STEPS: StepDef[] = [
     icon: Car,
   },
   {
+    stage: 'qc',
+    label: 'QC (Stok)',
+    desc: 'Pembelian selesai — unit masuk stok NOT READY, proses QC berjalan',
+    color: 'text-purple-700',
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-300',
+    icon: Circle,
+  },
+  {
     stage: 'available',
-    label: 'Unit Tersedia',
-    desc: 'Pembelian selesai — unit masuk ke data stok, siap dijual',
+    label: 'Unit READY',
+    desc: 'QC selesai — unit READY, siap dijual',
     color: 'text-emerald-700',
     bgColor: 'bg-emerald-50',
     borderColor: 'border-emerald-300',
@@ -81,7 +90,7 @@ const STEPS: StepDef[] = [
   },
 ]
 
-const FLOW: Stage[] = ['lead', 'inspecting', 'purchasing', 'available', 'sold']
+const FLOW: Stage[] = ['lead', 'inspecting', 'purchasing', 'qc', 'available', 'sold']
 const REJECT_PATH: Stage[] = ['lead', 'inspecting', 'rejected']
 
 function stageIndex(stage: Stage): number {
@@ -95,7 +104,7 @@ export function PipelineSimulatorPage() {
   const [filterStage, setFilterStage] = useState<Stage | 'all'>('lead')
   const [query, setQuery] = useState('')
 
-  const pool = usePipelineByStage(['lead', 'inspecting', 'purchasing', 'available', 'sold', 'rejected'])
+  const pool = usePipelineByStage(['lead', 'inspecting', 'purchasing', 'qc', 'available', 'sold', 'rejected'])
 
   const filtered = pool.filter((c) => {
     if (filterStage !== 'all' && c.stage !== filterStage) return false
@@ -303,8 +312,17 @@ export function PipelineSimulatorPage() {
 
               {car.stage === 'purchasing' && (
                 <ActionBtn
-                  label="Selesaikan Pembelian — Masuk Stok"
-                  desc="Pembayaran supplier selesai, unit masuk ke Master Unit"
+                  label="Selesaikan Pembelian — Masuk QC"
+                  desc="Pembayaran supplier selesai, unit masuk stok NOT READY & proses QC"
+                  onClick={() => doAdvance('qc')}
+                  color="emerald"
+                />
+              )}
+
+              {car.stage === 'qc' && (
+                <ActionBtn
+                  label="QC Selesai — Unit READY"
+                  desc="QC lolos, unit jadi READY dan masuk proses penjualan"
                   onClick={() => doAdvance('available')}
                   color="emerald"
                 />
@@ -411,6 +429,7 @@ function StagePill({ stage }: { stage: Stage }) {
     inspecting: 'bg-amber-50 text-amber-700',
     rejected: 'bg-red-50 text-red-700',
     purchasing: 'bg-indigo-50 text-indigo-700',
+    qc: 'bg-purple-50 text-purple-700',
     available: 'bg-emerald-50 text-emerald-700',
     sold: 'bg-slate-100 text-slate-700',
   }
@@ -419,6 +438,7 @@ function StagePill({ stage }: { stage: Stage }) {
     inspecting: 'Inspeksi',
     rejected: 'Ditolak',
     purchasing: 'Pembelian',
+    qc: 'NOT READY (QC)',
     available: 'Tersedia',
     sold: 'Terjual',
   }

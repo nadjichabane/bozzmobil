@@ -18,6 +18,8 @@ export type Sale = {
   profit: number
   status: SaleStatus
   completeness: number
+  /** BAST / BUKTI TRANSAKSI sudah ditandatangani (beda dari status pembayaran) */
+  bastCompleted: boolean
   jenisTransaksi: 'Penjualan Unit' | 'Trade In' | 'Rekonsiliasi'
   image: string
   salesPerson: string
@@ -45,6 +47,7 @@ export const SALES: Sale[] = SOLD_CARS.map((c, i) => ({
   profit: Math.round(c.sellPrice - c.buyPrice),
   status: SALES_STATUS[i % SALES_STATUS.length],
   completeness: i % 3 === 0 ? 100 : i % 3 === 1 ? 80 : 60,
+  bastCompleted: c.bastCompleted,
   jenisTransaksi: i % 4 === 0 ? 'Trade In' : 'Penjualan Unit',
   image: c.image,
   salesPerson: SALES_PERSONS[i % SALES_PERSONS.length],
